@@ -274,9 +274,9 @@ bot.command('PETXT', (ctx) => {
 })
 //SE ECE
 bot.action('se',(ctx) =>{
-    ctx.telegram.sendMessage(ctx.chat.id,'\nSUSTAINABLE ENGG.\nYou can directely download Scanned textbook by taping below\nTEXTBOOK=/PETXT1 /PETXT2 /PETXT3')     
+    ctx.telegram.sendMessage(ctx.chat.id,'\nSUSTAINABLE ENGG.\nYou can directely download Scanned textbook by taping below\nTEXTBOOK=/SETXT1 /SETXT2 /SETXT3')     
 })
-bot.command('PETXT1', (ctx) => {
+bot.command('SETXT1', (ctx) => {
     ctx.telegram.sendChatAction(ctx.chat.id, 'upload_file',)
     ctx.telegram.sendDocument(ctx.chat.id,
         'BQACAgUAAxkBAAMkX4Ra2kjnrvabx0lYijbqjsW76vcAAvcBAAKnmyFUpV-senTUDS8bBA',
