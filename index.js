@@ -1,8 +1,11 @@
+//{for testing
 // const Telegraf = require('telegraf')
 // const bot = new Telegraf('1129048108:AAG0hrQhTwqNHyed5159EyTpk0TeM4E9q0E')
+//}
+//{for heroku
 const { Composer } = require('micro-bot')
 const bot = new Composer
-
+//}
 bot.start((ctx) => {
     ctx.reply()
 })
@@ -12,7 +15,7 @@ bot.start((ctx) => {
 // })
 
 bot.on('sticker',(ctx) =>{
-    ctx.reply("Sorry!!!\nthis bot can perform the following command \n -/start -/help")
+    ctx.reply("Sorry!!!\nthis bot can perform the this command please send a Hi ")
 
 })
 // bot.hears('bug',(ctx) =>{
@@ -123,6 +126,19 @@ bot.action('ap',(ctx) =>{
     })   
     
 })
+bot.command('ContactAdmin',(ctx) =>{
+    ctx.deleteMessage()
+    ctx.telegram.sendMessage(ctx.chat.id,'Got bug!!!! Contact Admin ',  
+    { 
+        reply_markup:{
+            inline_keyboard:[
+                [{text: "Connect Whatsapp",url:"https://wa.me/918606683287"}],
+               
+            ]
+        }
+    })   
+    
+})
 
 
 /*civil----------------------------------------------------------------------------------------------*/
@@ -190,7 +206,7 @@ bot.action('ecs3',(ctx) =>{
 
 //ecs3ssd
 bot.action('ssd',(ctx) =>{
-    ctx.telegram.sendMessage(ctx.chat.id,'SOLID STATE DEVICES\n\nMODULE 1 IMPORTANT VIDEO LINKS\n1. https://rb.gy/xanoko\n2. https://rb.gy/d28di4\n3. https://rb.gy/j97e8j\n4. https://rb.gy/coniys\n5. https://rb.gy/cgagnq\n6. https://rb.gy/6qikn3\n7. https://rb.gy/hqmx8s\n8. https://rb.gy/wtnith\n9. https://rb.gy/we1jb2\nYou can directely download TEXTBOOK by taping below\nTEXTBOOK=/SSDTXT\nNOTE=/SSD1 /SSD2 /SSD3 /SSD4 /SSD5')     
+    ctx.telegram.sendMessage(ctx.chat.id,'SOLID STATE DEVICES\n\nMODULE 1 IMPORTANT VIDEO LINKS\n1. https://rb.gy/xanoko\n2. https://rb.gy/d28di4\n3. https://rb.gy/j97e8j\n4. https://rb.gy/coniys\n5. https://rb.gy/cgagnq\n6. https://rb.gy/6qikn3\n7. https://rb.gy/hqmx8s\n8. https://rb.gy/wtnith\n9. https://rb.gy/we1jb2\nYou can directely download TEXTBOOK by taping below\nTEXTBOOK=/SSDTXT\nNOTE\nModule1\n  /SSD11\n  /SSD12\nModule2\n  /SSD21\n  /SSD22\n  /SSD23\nModule3\n  /SSD31')     
 })
 
 bot.command('SSDTXT', (ctx) => {
@@ -200,15 +216,15 @@ bot.command('SSDTXT', (ctx) => {
         {"reply_to_message_id":ctx.message.message_id}
     )
 })
-bot.command('SSD1', (ctx) => {
+bot.command('SSD11', (ctx) => {
     ctx.telegram.sendChatAction(ctx.chat.id, 'upload_file',)
     ctx.telegram.sendDocument(ctx.chat.id,
-        'BQACAgUAAxkBAAIC7V-Agm-Ud5lAeQLdXcpG1qPSUgtzAAJDAQACdZvxV8IT70GsGIoCGwQ',
+        'BQACAgUAAxkBAAPCX4slfktf8bu2_3pUPZ2EStH-VcAAAkUBAAJ1m_FX9dxVfIIsrfgbBA',
         {"reply_to_message_id":ctx.message.message_id}
     )
 })
 
-bot.command('SSD2', (ctx) => {
+bot.command('SSD12', (ctx) => {
     ctx.telegram.sendChatAction(ctx.chat.id, 'upload_file',)
     ctx.telegram.sendDocument(ctx.chat.id,
         'BQACAgUAAxkBAAIC71-AgyGmBP1kcF-PK07-HYkDN55UAAJFAQACdZvxVz6nW25u8mE-GwQ',
@@ -216,25 +232,33 @@ bot.command('SSD2', (ctx) => {
     )
 })
 
-bot.command('SSD3', (ctx) => {
+bot.command('SSD21', (ctx) => {
     ctx.telegram.sendChatAction(ctx.chat.id, 'upload_file',)
     ctx.telegram.sendDocument(ctx.chat.id,
-        'BQACAgUAAxkBAAIC-V-Ag9hgkbMfF1vSQauzy1oPeoYGAAIaAQACOqIIVIEzit3fOp2uGwQ',
+        'BQACAgUAAxkBAAPFX4slzpeSS5tp0Jj35kRF5YoohwsAAhoBAAI6oghUKCN7Y8APq60bBA',
         {"reply_to_message_id":ctx.message.message_id}
     )
 })
 
-bot.command('SSD4', (ctx) => {
+bot.command('SSD22', (ctx) => {
     ctx.telegram.sendChatAction(ctx.chat.id, 'upload_file',)
     ctx.telegram.sendDocument(ctx.chat.id,
-        'BQACAgUAAxkBAAIC-l-AhfMfGCS5QJBpiV2QJMLoI0HwAAIaAQACOqIIVIEzit3fOp2uGwQ',
+        'BQACAgUAAxkBAAP3X4vyS2JcnSzJa4jNNnA8L0Riy8cAAgwCAAK_LmFU6NGo65pHpoAbBA',
         {"reply_to_message_id":ctx.message.message_id}
     )
 })
-bot.command('SSD5', (ctx) => {
+bot.command('SSD23', (ctx) => {
     ctx.telegram.sendChatAction(ctx.chat.id, 'upload_file',)
     ctx.telegram.sendDocument(ctx.chat.id,
-        'BQACAgUAAxkBAAIDDV-Ah5LnQL3nUu2d8Znn-T1olusZAAIbAQACOqIIVIecJ2aeGxHnGwQ',
+        'BQACAgUAAxkBAAPZX4vvbGrvg3mz030aik30S6MYVPoAApMBAAJQ7GBUffPgmrswH10bBA',
+        {"reply_to_message_id":ctx.message.message_id}
+    )
+})
+
+bot.command('SSD31', (ctx) => {
+    ctx.telegram.sendChatAction(ctx.chat.id, 'upload_file',)
+    ctx.telegram.sendDocument(ctx.chat.id,
+        'BQACAgUAAxkBAAIBF1-L90csrUVrpCEmozPAdRIXZ5FwAAINAgACvy5hVKNqUCtYSPfhGwQ',
         {"reply_to_message_id":ctx.message.message_id}
     )
 })
@@ -297,7 +321,11 @@ bot.command('PETXT3', (ctx) => {
         {"reply_to_message_id":ctx.message.message_id}
     )
 })
+// ece maths
 
+bot.action('ecmat',(ctx) =>{
+    ctx.telegram.sendMessage(ctx.chat.id,'Maths materials Will be available soon!!!!!!\n\n\n\n\nGot bug!!! /ContactAdmin')     
+})  
 /*mechanical--------------------------------------------------------------------------------------------*/
 bot.action('me',(ctx) =>{
     ctx.deleteMessage()
@@ -420,14 +448,16 @@ bot.action('menu',(ctx) =>{
 // })
 
 
-
+//---------------------------------------------------------------{for both maintains and testing
 bot.on('document',(ctx)=>{
     console.log(JSON.stringify(ctx.update.message.document))
 })
+//---------------------------------------------------------------}
 
 //shrouded-brushlands-98310
 //https://shrouded-brushlands-98310.herokuapp.com/
 
-
-module.exports = bot
+//---------------------
+module.exports = bot                                           // "start": "micro-bot",
+//---------------------
 // bot.launch()
