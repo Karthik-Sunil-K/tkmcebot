@@ -7,7 +7,7 @@ const { Composer } = require('micro-bot')
 const bot = new Composer
 //}
 bot.start((ctx) => {
-    ctx.reply()
+    ctx.reply("Send Hi")
 })
 
 // bot.action('lcd',(ctx) =>{
@@ -15,7 +15,11 @@ bot.start((ctx) => {
 // })
 
 bot.on('sticker',(ctx) =>{
-    ctx.reply("Sorry!!!\nthis bot can perform the this command please send a Hi ")
+    ctx.reply("Sorry!!!\nthis bot can't perform the this command please send a Hi ")
+
+})
+bot.on('text',(ctx) =>{
+    ctx.reply("Sorry!!!\nthis bot can't perform the this command please send a Hi ")
 
 })
 // bot.hears('bug',(ctx) =>{
@@ -25,7 +29,7 @@ bot.on('sticker',(ctx) =>{
 
 //Hi
 bot.hears('Hi',(ctx) =>{
-    ctx.telegram.sendMessage(ctx.chat.id,'Click here to select you department', 
+    ctx.telegram.sendMessage(ctx.chat.id,'Click here to select your department', 
     { 
         reply_markup:{
             inline_keyboard:[
@@ -40,7 +44,7 @@ bot.hears('Hi',(ctx) =>{
 
 //hi
 bot.hears('hi',(ctx) =>{
-    ctx.telegram.sendMessage(ctx.chat.id,'Click here to select you department', 
+    ctx.telegram.sendMessage(ctx.chat.id,'Click here to select your department', 
     { 
         reply_markup:{
             inline_keyboard:[
@@ -55,7 +59,7 @@ bot.hears('hi',(ctx) =>{
 
 //Hii
 bot.hears('Hii',(ctx) =>{
-    ctx.telegram.sendMessage(ctx.chat.id,'Click here to select you department', 
+    ctx.telegram.sendMessage(ctx.chat.id,'Click here to select your department', 
     { 
         reply_markup:{
             inline_keyboard:[
@@ -70,7 +74,7 @@ bot.hears('Hii',(ctx) =>{
 
 //hii
 bot.hears('hii',(ctx) =>{
-    ctx.telegram.sendMessage(ctx.chat.id,'Click here to select you department', 
+    ctx.telegram.sendMessage(ctx.chat.id,'Click here to select your department', 
     { 
         reply_markup:{
             inline_keyboard:[
@@ -85,7 +89,7 @@ bot.hears('hii',(ctx) =>{
 
 //hai
 bot.hears('hai',(ctx) =>{
-    ctx.telegram.sendMessage(ctx.chat.id,'Click here to select you department', 
+    ctx.telegram.sendMessage(ctx.chat.id,'Click here to select your department', 
     { 
         reply_markup:{
             inline_keyboard:[
@@ -100,7 +104,7 @@ bot.hears('hai',(ctx) =>{
 })
 //Hai
 bot.hears('Hai',(ctx) =>{
-    ctx.telegram.sendMessage(ctx.chat.id,'Click here to select you department', 
+    ctx.telegram.sendMessage(ctx.chat.id,'Click here to select your department', 
     { 
         reply_markup:{
             inline_keyboard:[
