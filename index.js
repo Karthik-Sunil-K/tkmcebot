@@ -18,10 +18,9 @@ bot.on('sticker',(ctx) =>{
     ctx.reply("Sorry!!!\nthis bot can't perform the this command please send a Hi ")
 
 })
-bot.on('text',(ctx) =>{
-    ctx.reply("Sorry!!!\nthis bot can't perform the this command please send a Hi ")
 
-})
+
+
 // bot.hears('bug',(ctx) =>{
 //     ctx.reply('Got bug!!!!!   https://wa.me/918606683287 \n https://t.me/918606683287')
 // })
