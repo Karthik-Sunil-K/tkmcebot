@@ -7,7 +7,7 @@ const { Composer } = require('micro-bot')
 const bot = new Composer
 //}
 bot.start((ctx) => {
-    ctx.reply("Send Hi")
+    ctx.reply("Send Hii")
 })
 
 // bot.action('lcd',(ctx) =>{
