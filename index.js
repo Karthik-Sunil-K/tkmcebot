@@ -22,7 +22,7 @@ bot.on('sticker',(ctx) =>{
 
 
 // bot.hears('bug',(ctx) =>{
-//     ctx.reply('Got bug!!!!!   https://wa.me/918606683287 \n https://t.me/918606683287')
+//     ctx.reply('Got bug!!!!!   https://wa.me/918606683287?text=Hii+Karthik+I+Found+a+bug+in+bot!!!! \n https://t.me/918606683287')
 // })
     
 
