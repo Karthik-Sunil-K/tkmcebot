@@ -1,5 +1,5 @@
 //{for testing
-// const Telegraf = require('telegraf')
+// const { Telegraf } = require('telegraf')
 // const bot = new Telegraf('1129048108:AAG0hrQhTwqNHyed5159EyTpk0TeM4E9q0E')
 //}
 //{for heroku
