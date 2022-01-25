@@ -15,7 +15,7 @@ bot.start((ctx) => {
 // })
 
 bot.on('sticker',(ctx) =>{
-    ctx.reply("Sorry!!!\nthis bot can't perform the this command please send a Hi ")
+    ctx.reply("Sorry!!!\nthis bot can't perform the this command please send a Hi \nWe will update soon")
 
 })
 
