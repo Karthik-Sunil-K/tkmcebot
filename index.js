@@ -10,7 +10,10 @@ const bot = new Composer;
 /* PRODUCTION END */
 
 const axios = require('axios');
+const Extra = require('telegraf/extra')
+const Markup = require('telegraf/markup')
 var { subjectsData, studyMaterials } = require('./data')
+const admins = [625310795, 591998055] //ela_innovation, KarthikSunilK
 
 const api = "https://script.google.com/a/tkmce.ac.in/macros/s/AKfycby_dH5yS_23YXDLGuAp-B0uH3H3UVYTW9onliiq5DLw9JB7y85hP8LjwCTL56kegkSxKA/exec"
 
@@ -84,7 +87,7 @@ const sendSemesters = (code, ctx) => {
                 [{ text: "SEMESTER 3", callback_data: code + "_3" }, { text: "SEMESTER 4", callback_data: code + "_4" }],
                 [{ text: "SEMESTER 5", callback_data: code + "_5" }, { text: "SEMESTER 6", callback_data: code + "_6" }],
                 [{ text: "SEMESTER 7", callback_data: code + "_7" }, { text: "SEMESTER 8", callback_data: code + "_8" }],
-                [{ text: "MAIN MENU", callback_data: "menu" }],
+                [{ text: "◀️ Back", callback_data: "menu" }],
             ]
         },
         parse_mode: "MarkdownV2"
@@ -103,7 +106,7 @@ const sendSubjectList = (code, ctx) => {
     }
 
     let inline_keyboard = subjects.map(Subject => {
-        return [{ text: `📘 ${Subject.code} - ${Subject.name} [📚 ${mateCount(Subject.code)}]`, callback_data: ['sub', Subject.code, code].join('_') }]
+        return [{ text: `📚 [${mateCount(Subject.code)}] ${Subject.code} - ${Subject.name}`, callback_data: ['sub', Subject.code, code].join('_') }]
     })
 
     inline_keyboard.push([{ text: "◀️ Back", callback_data: dipt }])
@@ -126,16 +129,19 @@ const sendSubjectDetails = (code, ctx) => {
     })
 
     const mateCount = module => {
-        return studyMaterials.filter(material => material.subjectCode == subCode && material.module == module).length
+        return studyMaterials.filter(material => {
+            return material.subjectCode == subCode &&
+                (material.module == module || material.module == 0)
+        }).length
     }
 
     if (subject) {
-        ctx.editMessageText(`*${codeToName(dipt)}* \\- ${sem}\n*${subCode}* \\- ${subject.name}\nSelect medule`, {
+        ctx.editMessageText(`*${codeToName(dipt)}* \\- ${sem}\n*${subCode}* \\- ${subject.name}\nSelect module`, {
             reply_markup: {
                 inline_keyboard: [
-                    [{ text: `Module 1 [📚 ${mateCount(1)}]`, callback_data: ['mod', subCode, '1', dipt, sem].join('_') }, { text: `Module 2 [📚 ${mateCount(2)}]`, callback_data: ['mod', subCode, '2', dipt, sem].join('_') }],
-                    [{ text: `Module 3 [📚 ${mateCount(3)}]`, callback_data: ['mod', subCode, '3', dipt, sem].join('_') }, { text: `Module 4 [📚 ${mateCount(4)}]`, callback_data: ['mod', subCode, '4', dipt, sem].join('_') }],
-                    [{ text: `Module 5 [📚 ${mateCount(5)}]`, callback_data: ['mod', subCode, '5', dipt, sem].join('_') }, { text: "◀️ Back", callback_data: [dipt, sem].join('_') }]
+                    [{ text: `Module 1 📚 [${mateCount(1)}]`, callback_data: ['mod', subCode, '1', dipt, sem].join('_') }, { text: `Module 2 📚 [${mateCount(2)}]`, callback_data: ['mod', subCode, '2', dipt, sem].join('_') }],
+                    [{ text: `Module 3 📚 [${mateCount(3)}]`, callback_data: ['mod', subCode, '3', dipt, sem].join('_') }, { text: `Module 4 📚 [${mateCount(4)}]`, callback_data: ['mod', subCode, '4', dipt, sem].join('_') }],
+                    [{ text: `Module 5 📚 [${mateCount(5)}]`, callback_data: ['mod', subCode, '5', dipt, sem].join('_') }, { text: "◀️ Back", callback_data: [dipt, sem].join('_') }]
                 ]
             },
             parse_mode: "MarkdownV2"
@@ -156,7 +162,7 @@ const sendModuleDetails = (code, ctx) => {
     const mateCount = type => {
         return studyMaterials.filter(material => {
             return material.subjectCode == subCode &&
-                material.module == module &&
+                (material.module == module || material.module == 0) &&
                 material.type == type
         }).length
     }
@@ -166,6 +172,7 @@ const sendModuleDetails = (code, ctx) => {
             reply_markup: {
                 inline_keyboard: [
                     [{ text: `🗒 Class Notes [${mateCount('CN')}]`, callback_data: ['mate_CN', subCode, module, dipt, sem].join('_') }, { text: `📄 Printed Notes [${mateCount('PN')}]`, callback_data: ['mate_PN', subCode, module, dipt, sem].join('_') }],
+                    [{ text: `📚 Text Books [${mateCount('TB')}]`, callback_data: ['mate_TB', subCode, module, dipt, sem].join('_') }, { text: `📃 Q Papers [${mateCount('QP')}]`, callback_data: ['mate_QP', subCode, module, dipt, sem].join('_') }],
                     [{ text: `🎞 Videos [${mateCount('V')}]`, callback_data: ['mate_V', subCode, module, dipt, sem].join('_') }, { text: "◀️ Back", callback_data: ['sub', subCode, dipt, sem].join('_') }]
                 ]
             },
@@ -186,25 +193,23 @@ const sendMeterialDetails = (code, ctx) => {
     })
 
     materials.forEach(async material => {
-        if (material.type == 'CN' || material.type == 'PN') {
+        if (material.type == 'CN' ||
+            material.type == 'PN' ||
+            material.type == 'TB' ||
+            material.type == 'QP') {
             try {
-                await ctx.telegram.sendDocument(ctx.chat.id, material.content)
+                await ctx.telegram.sendDocument(ctx.chat.id, material.content, {
+                    caption: `${material.name}\n\n @tkmcebot`
+                })
             } catch (error) {
                 reportError(`sendDocument - ${material.content}`, ctx)
+                console.log(error);
             }
         }
 
         if (material.type == 'V') {
-            let content = material.content
-                .replaceAll("_", "\\_")
-                .replaceAll("*", "\\*")
-                .replaceAll("[", "\\[")
-                .replaceAll("`", "\\`")
-                .replaceAll("-", "\\-")
-                .replaceAll(".", "\\.")
-
             try {
-                ctx.telegram.sendMessage(ctx.chat.id, `*${material.name}*\n${content}`, { parse_mode: "MarkdownV2" })
+                await ctx.telegram.sendMessage(ctx.chat.id, `*${material.name}*\n${material.content}\n\n @tkmcebot`, Extra.markdown())
             } catch (error) {
                 reportError(`sendMessage - ${content}`, ctx)
             }
@@ -215,7 +220,19 @@ const sendMeterialDetails = (code, ctx) => {
 //Start
 bot.start((ctx) => {
     ctx.reply(`Hi ${ctx.message.chat.first_name} ${ctx.message.chat.last_name}
-Send me a Hi`)
+I'm tkmce bot`)
+
+    ctx.telegram.sendMessage(ctx.chat.id, 'Click here to select your department', {
+        reply_markup: {
+            inline_keyboard: [
+                [{ text: "CIVIL", callback_data: "ce" }, { text: "MECHANICAL", callback_data: "mech" }],
+                [{ text: "ELECTRICAL & ELECTRONICS", callback_data: "eee" }, { text: "ELECTRONICS & COMMUNICATION", callback_data: "ece" }],
+                [{ text: "COMPUTER SCIENCE", callback_data: "cse" }, { text: "CHEMICAL", callback_data: "ce" }],
+                [{ text: "ARCHITECTURE", callback_data: "archi" }, { text: "🧑‍💻 Contact Admin", callback_data: "contactAdmin" }]
+            ]
+        }
+    })
+
     axios.get(`https://script.google.com/a/tkmce.ac.in/macros/s/AKfycby_dH5yS_23YXDLGuAp-B0uH3H3UVYTW9onliiq5DLw9JB7y85hP8LjwCTL56kegkSxKA/exec?action=newUser&${ctx.chat.username?ctx.chat.username:''}&chatId=${ctx.chat.id}&name=${ctx.message.chat.first_name} ${ctx.message.chat.last_name}`)
         .then(function(response) {
             // console.log(response);
@@ -233,7 +250,7 @@ bot.hears(['Hi', 'hi', 'Hii', 'hii', 'hai', 'Hai'], (ctx) => {
                 [{ text: "CIVIL", callback_data: "ce" }, { text: "MECHANICAL", callback_data: "mech" }],
                 [{ text: "ELECTRICAL & ELECTRONICS", callback_data: "eee" }, { text: "ELECTRONICS & COMMUNICATION", callback_data: "ece" }],
                 [{ text: "COMPUTER SCIENCE", callback_data: "cse" }, { text: "CHEMICAL", callback_data: "ce" }],
-                [{ text: "ARCHITECTURE", callback_data: "archi" }, { text: "Contact Admin", callback_data: "contactAdmin" }]
+                [{ text: "ARCHITECTURE", callback_data: "archi" }, { text: "🧑‍💻 Contact Admin", callback_data: "contactAdmin" }]
             ]
         }
     })
@@ -247,7 +264,7 @@ bot.action('menu', (ctx) => {
                 [{ text: "CIVIL", callback_data: "ce" }, { text: "MECHANICAL", callback_data: "mech" }],
                 [{ text: "ELECTRICAL & ELECTRONICS", callback_data: "eee" }, { text: "ELECTRONICS & COMMUNICATION", callback_data: "ece" }],
                 [{ text: "COMPUTER SCIENCE", callback_data: "cse" }, { text: "CHEMICAL", callback_data: "ce" }],
-                [{ text: "ARCHITECTURE", callback_data: "archi" }, { text: "Contact Admin", callback_data: "contactAdmin" }]
+                [{ text: "ARCHITECTURE", callback_data: "archi" }, { text: "🧑‍💻 Contact Admin", callback_data: "contactAdmin" }]
             ]
         }
     })
@@ -259,8 +276,8 @@ bot.action('contactAdmin', ctx => {
         reply_markup: {
             inline_keyboard: [
                 [{ text: "Karthik", url: "https://wa.me/918606683287?text=Hello from tkmce bot" }],
-                [{ text: "e-lab innovations", url: "https://wa.me/918089931063?text=Hello from tkmce bot" }],
-                [{ text: "MAIN MENU", callback_data: "menu" }]
+                [{ text: "e-lab innovations", url: "https://t.me/elab_innovations" }],
+                [{ text: "◀️ Back", callback_data: "menu" }]
             ]
         }
     })
@@ -313,10 +330,10 @@ bot.on('sticker', (ctx) => {
 })
 
 bot.command('updateDB', ctx => {
-    if (ctx.chat.username == 'elab_innovations') {
+    if (admins.includes(ctx.chat.id)) {
         updateData(ctx);
     } else {
-        ctx.telegram.sendMessage(ctx.chat.id, 'You can\'t do this')
+        ctx.telegram.sendMessage(ctx.chat.id, '❗️ You can\'t do that')
     }
 })
 
@@ -325,7 +342,7 @@ bot.command('updateDB', ctx => {
 bot.on('document', (ctx) => {
     ctx.telegram.sendMessage(ctx.chat.id, ctx.update.message.document.file_id)
     console.log(JSON.stringify(ctx.update.message.document))
-    console.log(ctx.chat);
+        // console.log(ctx);
 })
 
 updateData();
