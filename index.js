@@ -9,12 +9,41 @@ const { Composer } = require('micro-bot');
 const bot = new Composer;
 /* PRODUCTION END */
 
-const { subjectsData, studyMaterials } = require('./data')
+const axios = require('axios');
+var { subjectsData, studyMaterials } = require('./data')
 
-bot.start((ctx) => {
-    ctx.reply(`Hi ${ctx.message.chat.first_name} ${ctx.message.chat.last_name}
-Send me a Hi`)
-})
+const api = "https://script.google.com/a/tkmce.ac.in/macros/s/AKfycby_dH5yS_23YXDLGuAp-B0uH3H3UVYTW9onliiq5DLw9JB7y85hP8LjwCTL56kegkSxKA/exec"
+
+const updateData = (ctx) => {
+    axios.get(api + '?action=getSubjects')
+        .then(function(response) {
+            subjectsData = response.data ? response.data : subjectsData
+
+            if (ctx) {
+                ctx.telegram.sendMessage(ctx.chat.id, 'subjectsData updated, ' + subjectsData.length, +' items')
+            }
+        })
+        .catch(function(error) {
+            console.log(error);
+            if (ctx) {
+                ctx.telegram.sendMessage(ctx.chat.id, 'subjectsData updation failed, ' + subjectsData.length, +' items')
+            }
+        });
+
+    axios.get(api + '?action=getMaterials')
+        .then(function(response) {
+            studyMaterials = response.data ? response.data : studyMaterials
+            if (ctx) {
+                ctx.telegram.sendMessage(ctx.chat.id, 'studyMaterials updated, ' + studyMaterials.length, +' items')
+            }
+        })
+        .catch(function(error) {
+            console.log(error);
+            if (ctx) {
+                ctx.telegram.sendMessage(ctx.chat.id, 'studyMaterials updation failed, ' + studyMaterials.length, +' items')
+            }
+        });
+}
 
 const codeToName = code => {
     switch (code) {
@@ -40,7 +69,8 @@ const reportError = (msg, ctx) => {
     ctx.telegram.sendMessage(ctx.chat.id, 'Got bug!!!! Report to Admin ', {
         reply_markup: {
             inline_keyboard: [
-                [{ text: "Connect Whatsapp", url: "https://wa.me/918606683287?text=Got but\n" + msg }]
+                [{ text: "Karthik", url: "https://wa.me/918606683287?text=Got but\n" + msg }],
+                [{ text: "e-lab innovations", url: "https://wa.me/918089931063?text=Got but\n" + msg }]
             ]
         }
     })
@@ -158,19 +188,21 @@ const sendMeterialDetails = (code, ctx) => {
     materials.forEach(async material => {
         if (material.type == 'CN' || material.type == 'PN') {
             try {
-                await ctx.telegram.sendDocument(ctx.chat.id, material.file)
+                await ctx.telegram.sendDocument(ctx.chat.id, material.content)
             } catch (error) {
-                reportError(`sendDocument - ${material.file}`, ctx)
+                reportError(`sendDocument - ${material.content}`, ctx)
             }
         }
-        let content = material.content
-            .replaceAll("_", "\\_")
-            .replaceAll("*", "\\*")
-            .replaceAll("[", "\\[")
-            .replaceAll("`", "\\`")
-            .replaceAll("-", "\\-")
-            .replaceAll(".", "\\.")
+
         if (material.type == 'V') {
+            let content = material.content
+                .replaceAll("_", "\\_")
+                .replaceAll("*", "\\*")
+                .replaceAll("[", "\\[")
+                .replaceAll("`", "\\`")
+                .replaceAll("-", "\\-")
+                .replaceAll(".", "\\.")
+
             try {
                 ctx.telegram.sendMessage(ctx.chat.id, `*${material.name}*\n${content}`, { parse_mode: "MarkdownV2" })
             } catch (error) {
@@ -180,6 +212,18 @@ const sendMeterialDetails = (code, ctx) => {
     })
 }
 
+//Start
+bot.start((ctx) => {
+    ctx.reply(`Hi ${ctx.message.chat.first_name} ${ctx.message.chat.last_name}
+Send me a Hi`)
+    axios.get(`https://script.google.com/a/tkmce.ac.in/macros/s/AKfycby_dH5yS_23YXDLGuAp-B0uH3H3UVYTW9onliiq5DLw9JB7y85hP8LjwCTL56kegkSxKA/exec?action=newUser&${ctx.chat.username?ctx.chat.username:''}&chatId=${ctx.chat.id}&name=${ctx.message.chat.first_name} ${ctx.message.chat.last_name}`)
+        .then(function(response) {
+            // console.log(response);
+        })
+        .catch(function(error) {
+            console.log(error);
+        });
+})
 
 //Hi
 bot.hears(['Hi', 'hi', 'Hii', 'hii', 'hai', 'Hai'], (ctx) => {
@@ -189,7 +233,7 @@ bot.hears(['Hi', 'hi', 'Hii', 'hii', 'hai', 'Hai'], (ctx) => {
                 [{ text: "CIVIL", callback_data: "ce" }, { text: "MECHANICAL", callback_data: "mech" }],
                 [{ text: "ELECTRICAL & ELECTRONICS", callback_data: "eee" }, { text: "ELECTRONICS & COMMUNICATION", callback_data: "ece" }],
                 [{ text: "COMPUTER SCIENCE", callback_data: "cse" }, { text: "CHEMICAL", callback_data: "ce" }],
-                [{ text: "ARCHITECTURE", callback_data: "archi" }]
+                [{ text: "ARCHITECTURE", callback_data: "archi" }, { text: "Contact Admin", callback_data: "contactAdmin" }]
             ]
         }
     })
@@ -203,7 +247,20 @@ bot.action('menu', (ctx) => {
                 [{ text: "CIVIL", callback_data: "ce" }, { text: "MECHANICAL", callback_data: "mech" }],
                 [{ text: "ELECTRICAL & ELECTRONICS", callback_data: "eee" }, { text: "ELECTRONICS & COMMUNICATION", callback_data: "ece" }],
                 [{ text: "COMPUTER SCIENCE", callback_data: "cse" }, { text: "CHEMICAL", callback_data: "ce" }],
-                [{ text: "ARCHITECTURE", callback_data: "archi" }]
+                [{ text: "ARCHITECTURE", callback_data: "archi" }, { text: "Contact Admin", callback_data: "contactAdmin" }]
+            ]
+        }
+    })
+})
+
+//Conact admin option
+bot.action('contactAdmin', ctx => {
+    ctx.editMessageText('Contact Admin', {
+        reply_markup: {
+            inline_keyboard: [
+                [{ text: "Karthik", url: "https://wa.me/918606683287?text=Hello from tkmce bot" }],
+                [{ text: "e-lab innovations", url: "https://wa.me/918089931063?text=Hello from tkmce bot" }],
+                [{ text: "MAIN MENU", callback_data: "menu" }]
             ]
         }
     })
@@ -255,11 +312,23 @@ bot.on('sticker', (ctx) => {
 
 })
 
+bot.command('updateDB', ctx => {
+    if (ctx.chat.username == 'elab_innovations') {
+        updateData(ctx);
+    } else {
+        ctx.telegram.sendMessage(ctx.chat.id, 'You can\'t do this')
+    }
+})
+
 
 //Testing
 bot.on('document', (ctx) => {
+    ctx.telegram.sendMessage(ctx.chat.id, ctx.update.message.document.file_id)
     console.log(JSON.stringify(ctx.update.message.document))
+    console.log(ctx.chat);
 })
+
+updateData();
 
 //shrouded-brushlands-98310
 //https://shrouded-brushlands-98310.herokuapp.com/
@@ -269,5 +338,5 @@ module.exports = bot;
 /* PRODUCTION END */
 
 /* TEST START */
-// bot.launch()
+// bot.launch();
 /* TEST END */

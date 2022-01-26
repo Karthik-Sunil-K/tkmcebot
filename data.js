@@ -1,4 +1,4 @@
-const subjectsData = [{
+var subjectsData = [{
     name: 'Partial Differential Equation And Complex Analysis',
     code: 'MAT201',
     sem: 3,
@@ -45,12 +45,12 @@ const subjectsData = [{
     dipartment: 'ece'
 }]
 
-const studyMaterials = [{
+var studyMaterials = [{
     subjectCode: 'ECT201',
     module: 1,
     type: 'CN',
     name: 'SSD Text book',
-    file: 'BQACAgUAAxkBAAIBzmHwyv4DL4NbdLcX2WciTeYA143AAJFAQACdZvxV-99t0vrTgABgiME'
+    content: 'BQACAgUAAxkBAAIB82Hw2mp5of93fgABvUIhdlXLiFuhfgACRQEAAnWb8VfvfbdL604AAYIjBA'
 }, {
     subjectCode: 'ECT201',
     module: 1,
@@ -58,6 +58,7 @@ const studyMaterials = [{
     name: 'Youtue Videos',
     content: 'e-lab: https://elabins.com\nGoogle: https://google.com'
 }]
+
 
 module.exports.subjectsData = subjectsData
 module.exports.studyMaterials = studyMaterials
