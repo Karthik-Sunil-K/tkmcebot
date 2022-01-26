@@ -1,56 +1,63 @@
-const subjectsData = {
-    ce: {},
-    mech: {},
-    eee: {},
-    ece: {
-        S3: [{
-            name: 'Partial Differential Equation And Complex Analysis',
-            code: 'MAT201'
-        }, {
-            name: 'Solid State Devices',
-            code: 'ECT201'
-        }, {
-            name: 'Logic Circuit Design',
-            code: 'ECT203'
-        }, {
-            name: 'Network Theory',
-            code: 'ECT205'
-        }, {
-            name: 'Design And Engineering',
-            code: 'EST200'
-        }, {
-            name: 'Professional Ethics',
-            code: 'HUT200'
-        }, {
-            name: 'Sustainable Engineering',
-            code: 'MCN201'
-        }, {
-            name: 'Scientific Computing Lab',
-            code: 'ECL201'
-        }, {
-            name: 'Logic Design Lab',
-            code: 'ECL203'
-        }]
-    },
-    cse: {},
-    ce: {},
-    archi: {}
-}
+const subjectsData = [{
+    name: 'Partial Differential Equation And Complex Analysis',
+    code: 'MAT201',
+    sem: 3,
+    dipartment: 'ece'
+}, {
+    name: 'Solid State Devices',
+    code: 'ECT201',
+    sem: 3,
+    dipartment: 'ece'
+}, {
+    name: 'Logic Circuit Design',
+    code: 'ECT203',
+    sem: 3,
+    dipartment: 'ece'
+}, {
+    name: 'Network Theory',
+    code: 'ECT205',
+    sem: 3,
+    dipartment: 'ece'
+}, {
+    name: 'Design And Engineering',
+    code: 'EST200',
+    sem: 3,
+    dipartment: 'ece'
+}, {
+    name: 'Professional Ethics',
+    code: 'HUT200',
+    sem: 3,
+    dipartment: 'ece'
+}, {
+    name: 'Sustainable Engineering',
+    code: 'MCN201',
+    sem: 3,
+    dipartment: 'ece'
+}, {
+    name: 'Scientific Computing Lab',
+    code: 'ECL201',
+    sem: 3,
+    dipartment: 'ece'
+}, {
+    name: 'Logic Design Lab',
+    code: 'ECL203',
+    sem: 3,
+    dipartment: 'ece'
+}]
 
-const studyMaterials = {
-    ECT201: {
-        name: 'Solid State Devices',
-        materials: [{
-            type: 'file',
-            name: 'SSD Text book',
-            file: 'BQACAgUAAxkBAAIClV99tyjS1GN4h8x-G0LcoYpq4k0QAAJMAQAC4rjxV3UhsV8XHsy5GwQ'
-        }, {
-            type: 'youtube',
-            name: 'Youtue Videos',
-            links: 'https://elabins.com'
-        }]
-    }
-}
+const studyMaterials = [{
+    subjectCode: 'ECT201',
+    module: 1,
+    type: 'CN',
+    name: 'SSD Text book',
+    file: 'BQACAgUAAxkBAAIBzmHwyv4DL4NbdLcX2WciTeYA143AAJFAQACdZvxV-99t0vrTgABgiME'
+}, {
+    subjectCode: 'ECT201',
+    module: 1,
+    type: 'V',
+    name: 'Youtue Videos',
+    content: 'e-lab: https://elabins.com\nGoogle: https://google.com'
+}]
 
 module.exports.subjectsData = subjectsData
 module.exports.studyMaterials = studyMaterials
