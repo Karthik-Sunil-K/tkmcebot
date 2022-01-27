@@ -1,22 +1,22 @@
 /* TESTING START */
-// const { Telegraf } = require('telegraf');
+const { Telegraf } = require('telegraf');
 // const bot = new Telegraf('1129048108:AAG0hrQhTwqNHyed5159EyTpk0TeM4E9q0E');
-// const bot = new Telegraf('927312041:AAHS_s1hYTrPup8zO4tyKaS-Vwh9x8Px_ok');
+const bot = new Telegraf('927312041:AAHS_s1hYTrPup8zO4tyKaS-Vwh9x8Px_ok');
 /* TESTING END */
 
 /* PRODUCTION START */
-const { Composer } = require('micro-bot');
-const bot = new Composer;
+// const { Composer } = require('micro-bot');
+// const bot = new Composer;
 /* PRODUCTION END */
 
 const axios = require('axios');
 const Extra = require('telegraf/extra')
 const Markup = require('telegraf/markup')
 var { subjectsData, studyMaterials } = require('./data')
-const admins = [625310795, 591998055] //ela_innovation, KarthikSunilK
+var admins = [{ chatId: 625310795, userId: 'elab_innovations', name: 'e-lab innovations' }, { chatId: 591998055, userId: 'KarthikSunilK', name: 'Karthik Sunil K' }]
 
-const api = "https://script.google.com/a/tkmce.ac.in/macros/s/AKfycby_dH5yS_23YXDLGuAp-B0uH3H3UVYTW9onliiq5DLw9JB7y85hP8LjwCTL56kegkSxKA/exec"
-
+// const api = "https://script.google.com/a/tkmce.ac.in/macros/s/AKfycby_dH5yS_23YXDLGuAp-B0uH3H3UVYTW9onliiq5DLw9JB7y85hP8LjwCTL56kegkSxKA/exec"
+const api = "https://script.google.com/a/tkmce.ac.in/macros/s/AKfycbysbSOP4OO4XJ96jsp6hzIvDA7f06PrqORkLWR7X6iueHyhIC7TnSZm2vSacy6IWwTPSw/exec"
 const updateData = (ctx) => {
     axios.get(api + '?action=getSubjects')
         .then(function(response) {
@@ -95,10 +95,10 @@ const sendSemesters = (code, ctx) => {
 }
 
 const sendSubjectList = (code, ctx) => {
-    let dipt = code.split('_')[0]
+    let dept = code.split('_')[0]
     let sem = code.split('_')[1]
     let subjects = subjectsData.filter(subject => {
-        return subject.dipartment == dipt && subject.sem == sem
+        return subject.department == dept && subject.sem == sem
     })
 
     const mateCount = subCode => {
@@ -109,9 +109,9 @@ const sendSubjectList = (code, ctx) => {
         return [{ text: `📚 [${mateCount(Subject.code)}] ${Subject.code} - ${Subject.name}`, callback_data: ['sub', Subject.code, code].join('_') }]
     })
 
-    inline_keyboard.push([{ text: "◀️ Back", callback_data: dipt }])
+    inline_keyboard.push([{ text: "◀️ Back", callback_data: dept }])
 
-    ctx.editMessageText(`*${codeToName(dipt)}* \\- ${sem}\nSelect your Subject`, {
+    ctx.editMessageText(`*${codeToName(dept)}* \\- ${sem}\nSelect your Subject`, {
         reply_markup: {
             inline_keyboard: inline_keyboard
         },
@@ -121,7 +121,7 @@ const sendSubjectList = (code, ctx) => {
 
 const sendSubjectDetails = (code, ctx) => {
     let subCode = code.split('_')[1]
-    let dipt = code.split('_')[2]
+    let dept = code.split('_')[2]
     let sem = code.split('_')[3]
 
     let subject = subjectsData.find(subject => {
@@ -131,17 +131,17 @@ const sendSubjectDetails = (code, ctx) => {
     const mateCount = module => {
         return studyMaterials.filter(material => {
             return material.subjectCode == subCode &&
-                (material.module == module || material.module == 0)
+                (material.modules.includes(module + ''))
         }).length
     }
 
     if (subject) {
-        ctx.editMessageText(`*${codeToName(dipt)}* \\- ${sem}\n*${subCode}* \\- ${subject.name}\nSelect module`, {
+        ctx.editMessageText(`*${codeToName(dept)}* \\- ${sem}\n*${subCode}* \\- ${subject.name}\nSelect module`, {
             reply_markup: {
                 inline_keyboard: [
-                    [{ text: `Module 1 📚 [${mateCount(1)}]`, callback_data: ['mod', subCode, '1', dipt, sem].join('_') }, { text: `Module 2 📚 [${mateCount(2)}]`, callback_data: ['mod', subCode, '2', dipt, sem].join('_') }],
-                    [{ text: `Module 3 📚 [${mateCount(3)}]`, callback_data: ['mod', subCode, '3', dipt, sem].join('_') }, { text: `Module 4 📚 [${mateCount(4)}]`, callback_data: ['mod', subCode, '4', dipt, sem].join('_') }],
-                    [{ text: `Module 5 📚 [${mateCount(5)}]`, callback_data: ['mod', subCode, '5', dipt, sem].join('_') }, { text: "◀️ Back", callback_data: [dipt, sem].join('_') }]
+                    [{ text: `Module 1 📚 [${mateCount(1)}]`, callback_data: ['mod', subCode, '1', dept, sem].join('_') }, { text: `Module 2 📚 [${mateCount(2)}]`, callback_data: ['mod', subCode, '2', dept, sem].join('_') }],
+                    [{ text: `Module 3 📚 [${mateCount(3)}]`, callback_data: ['mod', subCode, '3', dept, sem].join('_') }, { text: `Module 4 📚 [${mateCount(4)}]`, callback_data: ['mod', subCode, '4', dept, sem].join('_') }],
+                    [{ text: `Module 5 📚 [${mateCount(5)}]`, callback_data: ['mod', subCode, '5', dept, sem].join('_') }, { text: "◀️ Back", callback_data: [dept, sem].join('_') }]
                 ]
             },
             parse_mode: "MarkdownV2"
@@ -152,7 +152,7 @@ const sendSubjectDetails = (code, ctx) => {
 const sendModuleDetails = (code, ctx) => {
     let subCode = code.split('_')[1]
     let module = code.split('_')[2]
-    let dipt = code.split('_')[3]
+    let dept = code.split('_')[3]
     let sem = code.split('_')[4]
 
     let subject = subjectsData.find(subject => {
@@ -162,18 +162,18 @@ const sendModuleDetails = (code, ctx) => {
     const mateCount = type => {
         return studyMaterials.filter(material => {
             return material.subjectCode == subCode &&
-                (material.module == module || material.module == 0) &&
+                (material.modules.includes(module + '')) &&
                 material.type == type
         }).length
     }
 
     if (subject) {
-        ctx.editMessageText(`*${codeToName(dipt)}* \\- ${sem}\n*${subCode}* \\- ${subject.name}\nMedule ${module}\nSelect your type`, {
+        ctx.editMessageText(`*${codeToName(dept)}* \\- ${sem}\n*${subCode}* \\- ${subject.name}\nMedule ${module}\nSelect your type`, {
             reply_markup: {
                 inline_keyboard: [
-                    [{ text: `🗒 Class Notes [${mateCount('CN')}]`, callback_data: ['mate_CN', subCode, module, dipt, sem].join('_') }, { text: `📄 Printed Notes [${mateCount('PN')}]`, callback_data: ['mate_PN', subCode, module, dipt, sem].join('_') }],
-                    [{ text: `📚 Text Books [${mateCount('TB')}]`, callback_data: ['mate_TB', subCode, module, dipt, sem].join('_') }, { text: `📃 Q Papers [${mateCount('QP')}]`, callback_data: ['mate_QP', subCode, module, dipt, sem].join('_') }],
-                    [{ text: `🎞 Videos [${mateCount('V')}]`, callback_data: ['mate_V', subCode, module, dipt, sem].join('_') }, { text: "◀️ Back", callback_data: ['sub', subCode, dipt, sem].join('_') }]
+                    [{ text: `🗒 Class Notes [${mateCount('CN')}]`, callback_data: ['mate_CN', subCode, module, dept, sem].join('_') }, { text: `📄 Printed Notes [${mateCount('PN')}]`, callback_data: ['mate_PN', subCode, module, dept, sem].join('_') }],
+                    [{ text: `📚 Text Books [${mateCount('TB')}]`, callback_data: ['mate_TB', subCode, module, dept, sem].join('_') }, { text: `📃 Q Papers [${mateCount('QP')}]`, callback_data: ['mate_QP', subCode, module, dept, sem].join('_') }],
+                    [{ text: `🎞 Videos [${mateCount('V')}]`, callback_data: ['mate_V', subCode, module, dept, sem].join('_') }, { text: "◀️ Back", callback_data: ['sub', subCode, dept, sem].join('_') }]
                 ]
             },
             parse_mode: "MarkdownV2"
@@ -188,7 +188,7 @@ const sendMeterialDetails = (code, ctx) => {
 
     let materials = studyMaterials.filter(material => {
         return material.subjectCode == subCode &&
-            material.module == module &&
+            material.modules.includes(module + '') &&
             material.type == mateType
     })
 
@@ -219,27 +219,32 @@ const sendMeterialDetails = (code, ctx) => {
 
 //Start
 bot.start((ctx) => {
-    ctx.reply(`Hi ${ctx.message.chat.first_name} ${ctx.message.chat.last_name}
-I'm tkmce bot`)
 
-    ctx.telegram.sendMessage(ctx.chat.id, 'Click here to select your department', {
-        reply_markup: {
-            inline_keyboard: [
-                [{ text: "CIVIL", callback_data: "ce" }, { text: "MECHANICAL", callback_data: "mech" }],
-                [{ text: "ELECTRICAL & ELECTRONICS", callback_data: "eee" }, { text: "ELECTRONICS & COMMUNICATION", callback_data: "ece" }],
-                [{ text: "COMPUTER SCIENCE", callback_data: "cse" }, { text: "CHEMICAL", callback_data: "ce" }],
-                [{ text: "ARCHITECTURE", callback_data: "archi" }, { text: "🧑‍💻 Contact Admin", callback_data: "contactAdmin" }]
-            ]
-        }
-    })
-
-    axios.get(`https://script.google.com/a/tkmce.ac.in/macros/s/AKfycby_dH5yS_23YXDLGuAp-B0uH3H3UVYTW9onliiq5DLw9JB7y85hP8LjwCTL56kegkSxKA/exec?action=newUser&${ctx.chat.username?ctx.chat.username:''}&chatId=${ctx.chat.id}&name=${ctx.message.chat.first_name} ${ctx.message.chat.last_name}`)
+    axios.get(`https://script.google.com/a/tkmce.ac.in/macros/s/AKfycbysbSOP4OO4XJ96jsp6hzIvDA7f06PrqORkLWR7X6iueHyhIC7TnSZm2vSacy6IWwTPSw/exec?action=newUser&userId=${ctx.chat.username?ctx.chat.username:''}&chatId=${ctx.chat.id}&name=${ctx.message.chat.first_name} ${ctx.message.chat.last_name}`)
         .then(function(response) {
             // console.log(response);
+            let isNew = response.data.success
+            ctx.reply(`Hi ${ctx.message.chat.first_name} ${ctx.message.chat.last_name}
+${isNew?'Welcome 😍': 'Welcome back 😍'}
+I'm tkmce bot`)
         })
         .catch(function(error) {
             console.log(error);
-        });
+            ctx.reply(`Hi ${ctx.message.chat.first_name} ${ctx.message.chat.last_name}
+Welcome back 😍
+I'm tkmce bot`)
+        }).then(function() {
+            ctx.telegram.sendMessage(ctx.chat.id, 'Click here to select your department', {
+                reply_markup: {
+                    inline_keyboard: [
+                        [{ text: "CIVIL", callback_data: "ce" }, { text: "MECHANICAL", callback_data: "mech" }],
+                        [{ text: "ELECTRICAL & ELECTRONICS", callback_data: "eee" }, { text: "ELECTRONICS & COMMUNICATION", callback_data: "ece" }],
+                        [{ text: "COMPUTER SCIENCE", callback_data: "cse" }, { text: "CHEMICAL", callback_data: "ce" }],
+                        [{ text: "ARCHITECTURE", callback_data: "archi" }, { text: "🧑‍💻 Contact Admin", callback_data: "contactAdmin" }]
+                    ]
+                }
+            })
+        })
 })
 
 //Hi
@@ -330,17 +335,30 @@ bot.on('sticker', (ctx) => {
 })
 
 bot.command('updateDB', ctx => {
-    if (admins.includes(ctx.chat.id)) {
+    let isAdmin = admins.find(admin => admin.chatId == ctx.chat.id)
+    if (isAdmin) {
         updateData(ctx);
     } else {
         ctx.telegram.sendMessage(ctx.chat.id, '❗️ You can\'t do that')
     }
 })
 
+bot.command('getid', ctx => {
+    if (ctx.update.message.reply_to_message) {
+        if (ctx.update.message.reply_to_message.document) {
+            ctx.reply("`" + ctx.update.message.reply_to_message.document.file_id + "`", Extra.markdownV2())
+        } else {
+            ctx.reply("That is not a document")
+        }
+    } else {
+        ctx.reply("Send as a reply to a document")
+    }
+})
+
 
 //Testing
 bot.on('document', (ctx) => {
-    ctx.telegram.sendMessage(ctx.chat.id, ctx.update.message.document.file_id)
+    // ctx.telegram.sendMessage(ctx.chat.id, ctx.update.message.document.file_id)
     console.log(JSON.stringify(ctx.update.message.document))
         // console.log(ctx);
 })
@@ -351,9 +369,9 @@ updateData();
 //https://shrouded-brushlands-98310.herokuapp.com/
 
 /* PRODUCTION START */
-module.exports = bot;
+// module.exports = bot;
 /* PRODUCTION END */
 
 /* TEST START */
-// bot.launch();
+bot.launch();
 /* TEST END */
