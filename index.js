@@ -1,7 +1,7 @@
+require('dotenv').config();
 /* TESTING START */
 const { Telegraf, Markup } = require('telegraf');
-// const bot = new Telegraf('1129048108:AAG0hrQhTwqNHyed5159EyTpk0TeM4E9q0E');
-// const bot = new Telegraf('927312041:AAHS_s1hYTrPup8zO4tyKaS-Vwh9x8Px_ok');
+// const bot = new Telegraf(process.env.BOT_TOKEN);
 /* TESTING END */
 
 /* PRODUCTION START */
@@ -10,12 +10,23 @@ const bot = new Composer;
 /* PRODUCTION END */
 
 const axios = require('axios');
+// var firebaseAdminSdk = require("firebase-admin");
 var { subjectsData, studyMaterials } = require('./data')
 var admins = [{ chatId: 625310795, userId: 'elab_innovations', name: 'e-lab innovations' }, { chatId: 591998055, userId: 'KarthikSunilK', name: 'Karthik Sunil K' }]
 var uploadMaterials = {}
 
 const api = "https://script.google.com/a/tkmce.ac.in/macros/s/AKfycbzKZvQrIDbNmbLuGV6BPDy-AJnBMeC-yMwm-ZjUW9Bdo4WI_w-r-ZelG0K0DZ7qudUx3Q/exec"
+
+// firebaseAdminSdk.initializeApp({
+//     credential: firebaseAdminSdk.credential.cert(
+//         JSON.parse(Buffer.from(process.env.GOOGLE_CONFIG_BASE64, 'base64').toString('ascii')))
+// });
+
+
 const updateData = (ctx) => {
+    if (ctx) {
+        ctx.telegram.sendChatAction(ctx.chat.id, 'typing')
+    }
     axios.get(api + '?action=getSubjects')
         .then(function(response) {
             subjectsData = response.data ? response.data : subjectsData
@@ -211,8 +222,9 @@ const sendMeterialDetails = (code, ctx) => {
             material.type == 'TB' ||
             material.type == 'QP') {
             try {
-                await ctx.telegram.replyWithHTML(ctx.chat.id, material.content, {
-                    caption: `<b>${material.name}</b>\n\n @tkmcebot`
+                await ctx.telegram.sendDocument(ctx.chat.id, material.content, {
+                    caption: `<b>${material.name}</b>\n\n @tkmcebot`,
+                    parse_mode: 'HTML'
                 })
             } catch (error) {
                 reportError(`sendDocument - ${material.content}`, ctx)
@@ -232,10 +244,12 @@ const sendMeterialDetails = (code, ctx) => {
 }
 
 const addMaterialToDB = (code, ctx) => {
+    ctx.telegram.sendChatAction(ctx.chat.id, 'upload_document')
     let message_id = code.split('_')[1]
     let uploadData = uploadMaterials[message_id]
     if (uploadData) {
-        axios.get(`https://script.google.com/a/tkmce.ac.in/macros/s/AKfycbzKZvQrIDbNmbLuGV6BPDy-AJnBMeC-yMwm-ZjUW9Bdo4WI_w-r-ZelG0K0DZ7qudUx3Q/exec?action=addMaterial&subjectCode=${uploadData.subjectCode}&module=${uploadData.modules}&type=${uploadData.type}&name=${uploadData.name}&content=${uploadData.content}`)
+        let url = encodeURI(`https://script.google.com/a/tkmce.ac.in/macros/s/AKfycbzKZvQrIDbNmbLuGV6BPDy-AJnBMeC-yMwm-ZjUW9Bdo4WI_w-r-ZelG0K0DZ7qudUx3Q/exec?action=addMaterial&subjectCode=${uploadData.subjectCode}&module=${uploadData.modules}&type=${uploadData.type}&name=${uploadData.name}&content=${uploadData.content}`)
+        axios.get(url)
             .then(function(response) {
                 if (response.data.success) {
                     ctx.reply(`New material added\n click /updateDB to update database`)
@@ -256,11 +270,12 @@ const addMaterialToDB = (code, ctx) => {
 
 //Start
 bot.start((ctx) => {
+    let fname = ctx.message.chat.first_name
+    let lname = ctx.message.chat.last_name
+    ctx.telegram.sendChatAction(ctx.chat.id, 'typing')
 
-    axios.get(`https://script.google.com/a/tkmce.ac.in/macros/s/AKfycbzKZvQrIDbNmbLuGV6BPDy-AJnBMeC-yMwm-ZjUW9Bdo4WI_w-r-ZelG0K0DZ7qudUx3Q/exec?action=newUser&userId=${ctx.chat.username?ctx.chat.username:''}&chatId=${ctx.chat.id}&name=${ctx.message.chat.first_name} ${ctx.message.chat.last_name}`)
+    axios.get(`https://script.google.com/a/tkmce.ac.in/macros/s/AKfycbzKZvQrIDbNmbLuGV6BPDy-AJnBMeC-yMwm-ZjUW9Bdo4WI_w-r-ZelG0K0DZ7qudUx3Q/exec?action=newUser&userId=${ctx.chat.username?ctx.chat.username:''}&chatId=${ctx.chat.id}&name=${fname?fname:""} ${lname?lname:""}`)
         .then(function(response) {
-            let fname = ctx.message.chat.first_name
-            let lname = ctx.message.chat.last_name
             let isNew = response.data.success
             if (isNew) {
                 ctx.replyWithHTML(`Hi ${fname?fname:""} ${lname?lname:""}
@@ -492,7 +507,7 @@ eg: <code>/addMaterial HUT200&1,2&CN&Module 2 Class Note</code>`
             parameters.shift() //remove subjectCode
             parameters.shift() //remove modules
             parameters.shift() //remove type
-            let name = parameters.join('&') // join full name
+            let name = parameters.join('&amp;') // join full name
 
             if (!(subjectsData.find(m => m.code == subjectCode))) {
                 ctx.replyWithHTML("⚠️ Subject code not found\nCheck subject code or update DB\n\n" + helpText)
@@ -508,12 +523,12 @@ eg: <code>/addMaterial HUT200&1,2&CN&Module 2 Class Note</code>`
 <b>Modules:</b> ${modules}
 <b>Type:</b> ${typeName[type]}
 <b>Content:</b>\n${ctx.update.message.reply_to_message.document.file_name}\n${content}`, {
-    reply_markup: {
-        inline_keyboard: [
-            [{ text: "❌ Cancel", callback_data: "deleteMsg" }, { text: "⬆️ Upload", callback_data: "addMaterial_" + ctx.update.message.message_id }]
-        ]
-    }
-})
+                    reply_markup: {
+                        inline_keyboard: [
+                            [{ text: "❌ Cancel", callback_data: "deleteMsg" }, { text: "⬆️ Upload", callback_data: "addMaterial_" + ctx.update.message.message_id }]
+                        ]
+                    }
+                })
             } else {
                 let content = ctx.update.message.reply_to_message.text;
                 let typeName = {CN:"✍️ Class Note",  PN:"📄 Printed Note", TB:"📚 Text Book", QP:"📄 Q Paper", V:"🎞 Video"}
@@ -525,12 +540,12 @@ eg: <code>/addMaterial HUT200&1,2&CN&Module 2 Class Note</code>`
 <b>Modules:</b> ${modules}
 <b>Type:</b> ${typeName[type]}
 <b>Content:</b>\n${content}`, {
-    reply_markup: {
-        inline_keyboard: [
-            [{ text: "❌ Cancel", callback_data: "deleteMsg" }, { text: "⬆️ Upload", callback_data: "addMaterial_" + ctx.update.message.message_id }]
-        ]
-    }
-})
+                    reply_markup: {
+                        inline_keyboard: [
+                            [{ text: "❌ Cancel", callback_data: "deleteMsg" }, { text: "⬆️ Upload", callback_data: "addMaterial_" + ctx.update.message.message_id }]
+                        ]
+                    }
+                })
             }
         } else {
             ctx.reply("⚠️ This command works only for reply.\nReply to a document or text")
@@ -543,8 +558,6 @@ eg: <code>/addMaterial HUT200&1,2&CN&Module 2 Class Note</code>`
 })
 
 /* ADMIN */
-
-
 //Testing
 bot.on('document', (ctx) => {
     // ctx.telegram.sendMessage(ctx.chat.id, ctx.update.message.document.file_id)

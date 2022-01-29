@@ -12,6 +12,8 @@
     "license": "ISC",
     "dependencies": {
         "axios": "^0.20.0",
+        "dotenv": "^14.3.2",
+        "firebase-admin": "^10.0.2",
         "micro-bot": "^2.5.3",
         "telegraf": "^4.6.0"
     },
