@@ -1,12 +1,12 @@
 /* TESTING START */
 const { Telegraf, Markup } = require('telegraf');
-const bot = new Telegraf('1129048108:AAG0hrQhTwqNHyed5159EyTpk0TeM4E9q0E');
+// const bot = new Telegraf('1129048108:AAG0hrQhTwqNHyed5159EyTpk0TeM4E9q0E');
 // const bot = new Telegraf('927312041:AAHS_s1hYTrPup8zO4tyKaS-Vwh9x8Px_ok');
 /* TESTING END */
 
 /* PRODUCTION START */
-// const { Composer } = require('micro-bot');
-// const bot = new Composer;
+const { Composer } = require('micro-bot');
+const bot = new Composer;
 /* PRODUCTION END */
 
 const axios = require('axios');
@@ -564,9 +564,9 @@ updateData();
 //https://shrouded-brushlands-98310.herokuapp.com/
 
 /* PRODUCTION START */
-// module.exports = bot;
+module.exports = bot;
 /* PRODUCTION END */
 
 /* TEST START */
-bot.launch();
+// bot.launch();
 /* TEST END */
