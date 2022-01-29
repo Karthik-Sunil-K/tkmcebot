@@ -211,8 +211,9 @@ const sendMeterialDetails = (code, ctx) => {
             material.type == 'TB' ||
             material.type == 'QP') {
             try {
-                await ctx.telegram.replyWithHTML(ctx.chat.id, material.content, {
-                    caption: `<b>${material.name}</b>\n\n @tkmcebot`
+                await ctx.telegram.sendDocument(ctx.chat.id, material.content, {
+                    caption: `<b>${material.name}</b>\n\n @tkmcebot`,
+                    parse_mode: 'HTML'
                 })
             } catch (error) {
                 reportError(`sendDocument - ${material.content}`, ctx)
