@@ -257,11 +257,10 @@ const addMaterialToDB = (code, ctx) => {
 
 //Start
 bot.start((ctx) => {
-
-    axios.get(`https://script.google.com/a/tkmce.ac.in/macros/s/AKfycbzKZvQrIDbNmbLuGV6BPDy-AJnBMeC-yMwm-ZjUW9Bdo4WI_w-r-ZelG0K0DZ7qudUx3Q/exec?action=newUser&userId=${ctx.chat.username?ctx.chat.username:''}&chatId=${ctx.chat.id}&name=${ctx.message.chat.first_name} ${ctx.message.chat.last_name}`)
+    let fname = ctx.message.chat.first_name
+    let lname = ctx.message.chat.last_name
+    axios.get(`https://script.google.com/a/tkmce.ac.in/macros/s/AKfycbzKZvQrIDbNmbLuGV6BPDy-AJnBMeC-yMwm-ZjUW9Bdo4WI_w-r-ZelG0K0DZ7qudUx3Q/exec?action=newUser&userId=${ctx.chat.username?ctx.chat.username:''}&chatId=${ctx.chat.id}&name=${fname?fname:""} ${lname?lname:""}`)
         .then(function(response) {
-            let fname = ctx.message.chat.first_name
-            let lname = ctx.message.chat.last_name
             let isNew = response.data.success
             if (isNew) {
                 ctx.replyWithHTML(`Hi ${fname?fname:""} ${lname?lname:""}
@@ -493,7 +492,7 @@ eg: <code>/addMaterial HUT200&1,2&CN&Module 2 Class Note</code>`
             parameters.shift() //remove subjectCode
             parameters.shift() //remove modules
             parameters.shift() //remove type
-            let name = parameters.join('&') // join full name
+            let name = parameters.join('&amp;') // join full name
 
             if (!(subjectsData.find(m => m.code == subjectCode))) {
                 ctx.replyWithHTML("⚠️ Subject code not found\nCheck subject code or update DB\n\n" + helpText)
