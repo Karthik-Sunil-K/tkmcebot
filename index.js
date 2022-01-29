@@ -236,6 +236,7 @@ const sendMeterialDetails = (code, ctx) => {
 }
 
 const addMaterialToDB = (code, ctx) => {
+    ctx.telegram.sendChatAction(ctx.chat.id, 'upload_document')
     let message_id = code.split('_')[1]
     let uploadData = uploadMaterials[message_id]
     if (uploadData) {
