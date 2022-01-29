@@ -16,6 +16,9 @@ var uploadMaterials = {}
 
 const api = "https://script.google.com/a/tkmce.ac.in/macros/s/AKfycbzKZvQrIDbNmbLuGV6BPDy-AJnBMeC-yMwm-ZjUW9Bdo4WI_w-r-ZelG0K0DZ7qudUx3Q/exec"
 const updateData = (ctx) => {
+    if (ctx) {
+        ctx.telegram.sendChatAction(ctx.chat.id, 'typing')
+    }
     axios.get(api + '?action=getSubjects')
         .then(function(response) {
             subjectsData = response.data ? response.data : subjectsData
@@ -259,6 +262,8 @@ const addMaterialToDB = (code, ctx) => {
 bot.start((ctx) => {
     let fname = ctx.message.chat.first_name
     let lname = ctx.message.chat.last_name
+    ctx.telegram.sendChatAction(ctx.chat.id, 'typing')
+
     axios.get(`https://script.google.com/a/tkmce.ac.in/macros/s/AKfycbzKZvQrIDbNmbLuGV6BPDy-AJnBMeC-yMwm-ZjUW9Bdo4WI_w-r-ZelG0K0DZ7qudUx3Q/exec?action=newUser&userId=${ctx.chat.username?ctx.chat.username:''}&chatId=${ctx.chat.id}&name=${fname?fname:""} ${lname?lname:""}`)
         .then(function(response) {
             let isNew = response.data.success
