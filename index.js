@@ -1,12 +1,12 @@
 /* TESTING START */
 const { Telegraf, Markup } = require('telegraf');
-// const bot = new Telegraf('1129048108:AAG0hrQhTwqNHyed5159EyTpk0TeM4E9q0E');
+const bot = new Telegraf('1129048108:AAG0hrQhTwqNHyed5159EyTpk0TeM4E9q0E');
 // const bot = new Telegraf('927312041:AAHS_s1hYTrPup8zO4tyKaS-Vwh9x8Px_ok');
 /* TESTING END */
 
 /* PRODUCTION START */
-const { Composer } = require('micro-bot');
-const bot = new Composer;
+// const { Composer } = require('micro-bot');
+// const bot = new Composer;
 /* PRODUCTION END */
 
 const axios = require('axios');
@@ -240,7 +240,8 @@ const addMaterialToDB = (code, ctx) => {
     let message_id = code.split('_')[1]
     let uploadData = uploadMaterials[message_id]
     if (uploadData) {
-        axios.get(`https://script.google.com/a/tkmce.ac.in/macros/s/AKfycbzKZvQrIDbNmbLuGV6BPDy-AJnBMeC-yMwm-ZjUW9Bdo4WI_w-r-ZelG0K0DZ7qudUx3Q/exec?action=addMaterial&subjectCode=${uploadData.subjectCode}&module=${uploadData.modules}&type=${uploadData.type}&name=${uploadData.name}&content=${uploadData.content}`)
+        let url = encodeURI(`https://script.google.com/a/tkmce.ac.in/macros/s/AKfycbzKZvQrIDbNmbLuGV6BPDy-AJnBMeC-yMwm-ZjUW9Bdo4WI_w-r-ZelG0K0DZ7qudUx3Q/exec?action=addMaterial&subjectCode=${uploadData.subjectCode}&module=${uploadData.modules}&type=${uploadData.type}&name=${uploadData.name}&content=${uploadData.content}`)
+        axios.get(url)
             .then(function(response) {
                 if (response.data.success) {
                     ctx.reply(`New material added\n click /updateDB to update database`)
@@ -514,12 +515,12 @@ eg: <code>/addMaterial HUT200&1,2&CN&Module 2 Class Note</code>`
 <b>Modules:</b> ${modules}
 <b>Type:</b> ${typeName[type]}
 <b>Content:</b>\n${ctx.update.message.reply_to_message.document.file_name}\n${content}`, {
-    reply_markup: {
-        inline_keyboard: [
-            [{ text: "❌ Cancel", callback_data: "deleteMsg" }, { text: "⬆️ Upload", callback_data: "addMaterial_" + ctx.update.message.message_id }]
-        ]
-    }
-})
+                    reply_markup: {
+                        inline_keyboard: [
+                            [{ text: "❌ Cancel", callback_data: "deleteMsg" }, { text: "⬆️ Upload", callback_data: "addMaterial_" + ctx.update.message.message_id }]
+                        ]
+                    }
+                })
             } else {
                 let content = ctx.update.message.reply_to_message.text;
                 let typeName = {CN:"✍️ Class Note",  PN:"📄 Printed Note", TB:"📚 Text Book", QP:"📄 Q Paper", V:"🎞 Video"}
@@ -531,12 +532,12 @@ eg: <code>/addMaterial HUT200&1,2&CN&Module 2 Class Note</code>`
 <b>Modules:</b> ${modules}
 <b>Type:</b> ${typeName[type]}
 <b>Content:</b>\n${content}`, {
-    reply_markup: {
-        inline_keyboard: [
-            [{ text: "❌ Cancel", callback_data: "deleteMsg" }, { text: "⬆️ Upload", callback_data: "addMaterial_" + ctx.update.message.message_id }]
-        ]
-    }
-})
+                    reply_markup: {
+                        inline_keyboard: [
+                            [{ text: "❌ Cancel", callback_data: "deleteMsg" }, { text: "⬆️ Upload", callback_data: "addMaterial_" + ctx.update.message.message_id }]
+                        ]
+                    }
+                })
             }
         } else {
             ctx.reply("⚠️ This command works only for reply.\nReply to a document or text")
@@ -549,8 +550,6 @@ eg: <code>/addMaterial HUT200&1,2&CN&Module 2 Class Note</code>`
 })
 
 /* ADMIN */
-
-
 //Testing
 bot.on('document', (ctx) => {
     // ctx.telegram.sendMessage(ctx.chat.id, ctx.update.message.document.file_id)
@@ -565,9 +564,9 @@ updateData();
 //https://shrouded-brushlands-98310.herokuapp.com/
 
 /* PRODUCTION START */
-module.exports = bot;
+// module.exports = bot;
 /* PRODUCTION END */
 
 /* TEST START */
-// bot.launch();
+bot.launch();
 /* TEST END */
