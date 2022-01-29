@@ -1,7 +1,7 @@
+require('dotenv').config();
 /* TESTING START */
 const { Telegraf, Markup } = require('telegraf');
-// const bot = new Telegraf('1129048108:AAG0hrQhTwqNHyed5159EyTpk0TeM4E9q0E');
-// const bot = new Telegraf('927312041:AAHS_s1hYTrPup8zO4tyKaS-Vwh9x8Px_ok');
+// const bot = new Telegraf(process.env.BOT_TOKEN);
 /* TESTING END */
 
 /* PRODUCTION START */
@@ -10,11 +10,19 @@ const bot = new Composer;
 /* PRODUCTION END */
 
 const axios = require('axios');
+// var firebaseAdminSdk = require("firebase-admin");
 var { subjectsData, studyMaterials } = require('./data')
 var admins = [{ chatId: 625310795, userId: 'elab_innovations', name: 'e-lab innovations' }, { chatId: 591998055, userId: 'KarthikSunilK', name: 'Karthik Sunil K' }]
 var uploadMaterials = {}
 
 const api = "https://script.google.com/a/tkmce.ac.in/macros/s/AKfycbzKZvQrIDbNmbLuGV6BPDy-AJnBMeC-yMwm-ZjUW9Bdo4WI_w-r-ZelG0K0DZ7qudUx3Q/exec"
+
+// firebaseAdminSdk.initializeApp({
+//     credential: firebaseAdminSdk.credential.cert(
+//         JSON.parse(Buffer.from(process.env.GOOGLE_CONFIG_BASE64, 'base64').toString('ascii')))
+// });
+
+
 const updateData = (ctx) => {
     if (ctx) {
         ctx.telegram.sendChatAction(ctx.chat.id, 'typing')
