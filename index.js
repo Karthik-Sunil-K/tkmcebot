@@ -81,18 +81,18 @@ const codeToName = code => {
     }
 }
 const reportError = (msg, ctx) => {
-    ctx.telegram.sendMessage(ctx.chat.id, 'Got bug!!!! Report to Admin ', {
+    ctx.telegram.sendMessage(ctx.chat.id, '🪲 Got bug!\nReport to Developer 👨🏻‍💻', {
         reply_markup: {
             inline_keyboard: [
-                [{ text: "Karthik", url: "https://wa.me/918606683287?text=Got but\n" + msg }],
-                [{ text: "e-lab innovations", url: "https://wa.me/918089931063?text=Got but\n" + msg }]
+                [{ text: "Karthik", url: "https://wa.me/918606683287?text=Got Bug\n" + msg }],
+                [{ text: "e-lab innovations", url: "https://wa.me/918089931063?text=Got Bug\n" + msg }]
             ]
         }
     })
 }
 
 const sendSemesters = (code, ctx) => {
-    ctx.editMessageText(`*${codeToName(code)}*\nSelect your Semester`, {
+    ctx.editMessageText(`*${codeToName(code)}*\n\nSelect your *Semester* 👇`, {
         reply_markup: {
             inline_keyboard: [
                 [{ text: "SEMESTER 1", callback_data: code + "_1" }, { text: "SEMESTER 2", callback_data: code + "_2" }],
@@ -123,7 +123,7 @@ const sendSubjectList = (code, ctx) => {
 
     inline_keyboard.push([{ text: "◀️ Back", callback_data: dept }])
 
-    ctx.editMessageText(`*${codeToName(dept)}* \\- ${sem}\nSelect your Subject`, {
+    ctx.editMessageText(`*${codeToName(dept)}*\n*Semester ${sem}*\n\nSelect a *Subject* 👇`, {
         reply_markup: {
             inline_keyboard: inline_keyboard
         },
@@ -148,7 +148,7 @@ const sendSubjectDetails = (code, ctx) => {
     }
 
     if (subject) {
-        ctx.editMessageText(`*${codeToName(dept)}* \\- ${sem}\n*${subCode}* \\- ${subject.name}\nSelect module`, {
+        ctx.editMessageText(`*${codeToName(dept)}*\n*Semester ${sem}*\n*${subCode}* \\- ${subject.name}\n\nSelect *Module*`, {
             reply_markup: {
                 inline_keyboard: [
                     [{ text: `Module 1 📚 [${mateCount(1)}]`, callback_data: ['mod', subCode, '1', dept, sem].join('_') }, { text: `Module 2 📚 [${mateCount(2)}]`, callback_data: ['mod', subCode, '2', dept, sem].join('_') }],
@@ -181,7 +181,7 @@ const sendModuleDetails = (code, ctx) => {
     }
 
     if (subject) {
-        ctx.editMessageText(`*${codeToName(dept)}* \\- ${sem}\n*${subCode}* \\- ${subject.name}\nMedule ${module}\nSelect your type`, {
+        ctx.editMessageText(`*${codeToName(dept)}*\n*Semester ${sem}*\n*${subCode}* \\- ${subject.name}\n*Medule ${module}*\n\nSelect a type 👇`, {
             reply_markup: {
                 inline_keyboard: [
                     [{ text: `✍️ Class Notes [${mateCount('CN')}]`, callback_data: ['mate_CN', subCode, module, dept, sem].join('_') }, { text: `📄 Printed Notes [${mateCount('PN')}]`, callback_data: ['mate_PN', subCode, module, dept, sem].join('_') }],
@@ -211,8 +211,8 @@ const sendMeterialDetails = (code, ctx) => {
             material.type == 'TB' ||
             material.type == 'QP') {
             try {
-                await ctx.telegram.sendDocument(ctx.chat.id, material.content, {
-                    caption: `${material.name}\n\n @tkmcebot`
+                await ctx.telegram.replyWithHTML(ctx.chat.id, material.content, {
+                    caption: `<b>${material.name}</b>\n\n @tkmcebot`
                 })
             } catch (error) {
                 reportError(`sendDocument - ${material.content}`, ctx)
@@ -222,7 +222,7 @@ const sendMeterialDetails = (code, ctx) => {
 
         if (material.type == 'V') {
             try {
-                await ctx.replyWithMarkdown(`*${material.name}*\n${material.content}\n\n @tkmcebot`)
+                await ctx.replyWithHTML(`<b>${material.name}</b>\n\n${material.content}\n\n @tkmcebot`)
             } catch (error) {
                 console.log(error);
                 reportError(`sendMessage - ${material.content}`, ctx)
@@ -253,22 +253,30 @@ const addMaterialToDB = (code, ctx) => {
     }
 }
 
+
 //Start
 bot.start((ctx) => {
 
     axios.get(`https://script.google.com/a/tkmce.ac.in/macros/s/AKfycbzKZvQrIDbNmbLuGV6BPDy-AJnBMeC-yMwm-ZjUW9Bdo4WI_w-r-ZelG0K0DZ7qudUx3Q/exec?action=newUser&userId=${ctx.chat.username?ctx.chat.username:''}&chatId=${ctx.chat.id}&name=${ctx.message.chat.first_name} ${ctx.message.chat.last_name}`)
         .then(function(response) {
-            // console.log(response);
+            let fname = ctx.message.chat.first_name
+            let lname = ctx.message.chat.last_name
             let isNew = response.data.success
-            ctx.reply(`Hi ${ctx.message.chat.first_name} ${ctx.message.chat.last_name}
-${isNew?'Welcome 😍': 'Welcome back 😍'}
-I'm tkmce bot`)
+            if (isNew) {
+                ctx.replyWithHTML(`Hi ${fname?fname:""} ${lname?lname:""}
+I'm <a href="tg://user?id=1129048108">tkmce bot</a> developed to provide study materials.
+Please send 'Hi' or click /start to get options.
+For contributing study material, click /contribute`)
+            } else {
+                ctx.reply(`Hi ${fname?fname:""} ${lname?lname:""}\nWelcome back 😍`)
+            }
         })
         .catch(function(error) {
             console.log(error);
-            ctx.reply(`Hi ${ctx.message.chat.first_name} ${ctx.message.chat.last_name}
-Welcome back 😍
-I'm tkmce bot`)
+            ctx.replyWithHTML(`Hi ${fname?fname:""} ${lname?lname:""}
+I'm <a href="tg://user?id=1129048108">tkmce bot</a> developed to provide study materials.
+Please send 'Hi' or click /start to get options.
+For contributing study material, click /contribute`)
         }).then(function() {
             ctx.telegram.sendMessage(ctx.chat.id, 'Click here to select your department', {
                 reply_markup: {
@@ -337,6 +345,11 @@ bot.action('contactDevs', ctx => {
     })
 })
 
+//Delete Message
+bot.action('deleteMsg', ctx => {
+    ctx.deleteMessage()
+})
+
 //Contriute
 bot.action('contribute', ctx => {
             let msg = `I appreciate your interest in contributing.
@@ -350,6 +363,32 @@ ${admins.map(admin => `🧑‍💻 <a href="tg://user?id=${admin.chatId}">${admi
         parse_mode: 'HTML'
     })
 })
+
+//contribute
+bot.command('contribute', ctx => {
+    let msg = `I appreciate your interest in contributing.
+Contact <b>admins</b> to upload study materials.
+Thank you 😍
+
+<b>ADMINS</b>
+${admins.map(admin => `🧑‍💻 <a href="tg://user?id=${admin.chatId}">${admin.userId}</a>`).join('\n')}
+`
+    ctx.telegram.sendMessage(ctx.chat.id, msg, {
+        parse_mode: 'HTML'
+    })
+})
+
+//Help
+bot.command('help', ctx => {
+    let fname = ctx.message.chat.first_name
+    let lname = ctx.message.chat.last_name
+    ctx.replyWithHTML(`Hi ${fname?fname:""} ${lname?lname:""}
+I'm <a href="tg://user?id=1129048108">tkmce bot</a> developed to provide study materials.
+Please send 'Hi' or click /start to get options.
+For contributing study material, click /contribute
+`)
+})
+
 
 bot.on('callback_query', (ctx) => {
     let qData = ctx.callbackQuery.data
@@ -386,8 +425,6 @@ bot.on('callback_query', (ctx) => {
         addMaterialToDB(qData, ctx)
     }
 
-    // console.log(qData);
-
     // Explicit usage
     ctx.telegram.answerCbQuery(ctx.callbackQuery.id)
 
@@ -400,6 +437,8 @@ bot.on('sticker', (ctx) => {
 
 })
 
+/* ADMIN */
+//Update Database
 bot.command('updateDB', ctx => {
     let isAdmin = admins.find(admin => admin.chatId == ctx.chat.id)
     if (isAdmin) {
@@ -409,6 +448,7 @@ bot.command('updateDB', ctx => {
     }
 })
 
+//Send File ID
 bot.command('getid', ctx => {
     if (ctx.update.message.reply_to_message) {
         if (ctx.update.message.reply_to_message.document) {
@@ -421,79 +461,88 @@ bot.command('getid', ctx => {
     }
 })
 
+//Add New Material
 bot.command('addMaterial', (ctx) => {
     let isAdmin = admins.find(admin => admin.chatId == ctx.chat.id)
     if (isAdmin) {
     let text = ctx.update.message.text
     text = text.replace('/addMaterial ', '')
     let parameters = text.split('&')
-    if (!(parameters.length == 4)) {
-        ctx.reply(`Send like
-/addMaterial subjectCode&moduels&type&name
+    let helpText = `Send like
+<code>/addMaterial subjectCode&moduels&type&name</code>
 
-subjectCode: Subject in capital letters
-modules: Modules sperated by comma(,)
-type: Type of the material
-      CN - Class Note
-      PN - Printed Note
-      TB - Text Book
-      QP - Question Paper
-      V - Video link
-name: Name of the material
+<b>subjectCode</b>: Subject in capital letters
+<b>modules</b>: Modules sperated by comma(,)
+<b>type</b>: Type of the material
+        CN - Class Note
+        PN - Printed Note
+        TB - Text Book
+        QP - Question Paper
+        V - Video link
+<b>name</b>: Name of the material
 
-eg: /addMaterial HUT200&1,2&CN&Module 2 Class Note`)
+eg: <code>/addMaterial HUT200&1,2&CN&Module 2 Class Note</code>`
+    if (!(parameters.length >= 4)) {
+        ctx.replyWithHTML('⚠️ ' + helpText)
     } else {
         if (ctx.update.message.reply_to_message) {
             let subjectCode = parameters[0]
             let modules = parameters[1]
             let type = parameters[2]
-            let name = parameters[3]
+            parameters.shift() //remove subjectCode
+            parameters.shift() //remove modules
+            parameters.shift() //remove type
+            let name = parameters.join('&') // join full name
 
             if (!(subjectsData.find(m => m.code == subjectCode))) {
-                ctx.reply("Subject code not found\nCheck subject code or update DB")
+                ctx.replyWithHTML("⚠️ Subject code not found\nCheck subject code or update DB\n\n" + helpText)
             } else if(!(type == 'CN' || type == 'PN' || type == 'TB' || type == 'QP' || type == 'V')) {
-                ctx.reply("Wrong type")
+                ctx.replyWithHTML("⚠️ Wrong type\n\n" + helpText)
             } else if (ctx.update.message.reply_to_message.document) {
                 let content = ctx.update.message.reply_to_message.document.file_id;
                 uploadMaterials[ctx.update.message.message_id] = {subjectCode, modules, type, name, content}
-                ctx.reply(`Your study material is ready upload
-Name: ${name}
-Suject: ${subjectCode + ' - ' + subjectsData.find(m => m.code == subjectCode).name}
-Modules: ${modules}
-Type: ${type}
-Content: ${content}`, {
+                let typeName = {CN:"✍️ Class Note",  PN:"📄 Printed Note", TB:"📚 Text Book", QP:"📄 Q Paper", V:"🎞 Video"}
+                ctx.replyWithHTML(`<b>Your study material is ready upload</b>\n
+<b>Name:</b> ${name}
+<b>Suject:</b> ${subjectCode + ' - ' + subjectsData.find(m => m.code == subjectCode).name}
+<b>Modules:</b> ${modules}
+<b>Type:</b> ${typeName[type]}
+<b>Content:</b>\n${ctx.update.message.reply_to_message.document.file_name}\n${content}`, {
     reply_markup: {
         inline_keyboard: [
-            [{ text: "⬆️ Upload", callback_data: "addMaterial_" + ctx.update.message.message_id }]
+            [{ text: "❌ Cancel", callback_data: "deleteMsg" }, { text: "⬆️ Upload", callback_data: "addMaterial_" + ctx.update.message.message_id }]
         ]
     }
 })
             } else {
                 let content = ctx.update.message.reply_to_message.text;
+                let typeName = {CN:"✍️ Class Note",  PN:"📄 Printed Note", TB:"📚 Text Book", QP:"📄 Q Paper", V:"🎞 Video"}
                 type = 'V'
                 uploadMaterials[ctx.update.message.message_id] = {subjectCode, modules, type, name, content}
-                ctx.reply(`Your study material is ready upload
-Name: ${name}
-Suject: ${subjectCode + ' - ' + subjectsData.find(m => m.code == subjectCode).name}
-Modules: ${modules}
-Type: ${type}
-Content: ${content}`, {
+                ctx.replyWithHTML(`<b>Your study material is ready upload</b>\n
+<b>Name:</b> ${name}
+<b>Suject:</b> ${subjectCode + ' - ' + subjectsData.find(m => m.code == subjectCode).name}
+<b>Modules:</b> ${modules}
+<b>Type:</b> ${typeName[type]}
+<b>Content:</b>\n${content}`, {
     reply_markup: {
         inline_keyboard: [
-            [{ text: "⬆️ Upload", callback_data: "addMaterial_" + ctx.update.message.message_id }]
+            [{ text: "❌ Cancel", callback_data: "deleteMsg" }, { text: "⬆️ Upload", callback_data: "addMaterial_" + ctx.update.message.message_id }]
         ]
     }
 })
             }
         } else {
-            ctx.reply("This command works only for reply.\nReply to a document or text")
+            ctx.reply("⚠️ This command works only for reply.\nReply to a document or text")
         }
     }
     
 } else {
-    ctx.telegram.sendMessage(ctx.chat.id, '❗️ You can\'t do that')
+    ctx.telegram.sendMessage(ctx.chat.id, '⚠️ You don\'t have permission to perform this task. For assistance, contact your account admin')
 }
 })
+
+/* ADMIN */
 
 
 //Testing
