@@ -16,6 +16,7 @@ var admins = [{ chatId: 625310795, userId: 'elab_innovations', name: 'e-lab inno
 var uploadMaterials = {}
 var uploadSubject = {}
 
+//https://stackoverflow.com/a/61844642/11409930
 firebaseAdminSdk.initializeApp({
     credential: firebaseAdminSdk.credential.cert(
         JSON.parse(Buffer.from(process.env.GOOGLE_CONFIG_BASE64, 'base64').toString('ascii'))),
@@ -290,13 +291,14 @@ bot.start((ctx) => {
     let chatId = ctx.chat.id
     let userId = ctx.chat.username ? ctx.chat.username : ''
     ctx.telegram.sendChatAction(ctx.chat.id, 'typing')
+    console.log(ctx.chat);
 
     db.ref("users/" + chatId).once("value", snapshot => {
         let isNew = !snapshot.val()
         if (isNew) {
             ctx.telegram.sendMessage(chatId, `Hi ${fname} ${lname}
 I'm <a href="tg://user?id=1129048108">tkmce bot</a> developed to provide study materials.
-Click /help to get help.\n\nClick here to select your department`, {
+Click /help to get help.\n\nClick here to select your department 👇`, {
                 reply_markup: {
                     inline_keyboard: [
                         [{ text: "CIVIL", callback_data: "ce" }, { text: "MECHANICAL", callback_data: "mech" }],
@@ -315,7 +317,7 @@ Click /help to get help.\n\nClick here to select your department`, {
                 lname
             });
         } else {
-            ctx.telegram.sendMessage(chatId, `Hi ${fname} ${lname}\nWelcome back 😍\n\nClick here to select your department`, {
+            ctx.telegram.sendMessage(chatId, `Hi ${fname} ${lname}\nWelcome back 😍\n\nClick here to select your department 👇`, {
                 reply_markup: {
                     inline_keyboard: [
                         [{ text: "CIVIL", callback_data: "ce" }, { text: "MECHANICAL", callback_data: "mech" }],
@@ -325,6 +327,14 @@ Click /help to get help.\n\nClick here to select your department`, {
                     ]
                 }
             })
+
+            //update user data
+            db.ref('users').child(chatId).set({
+                userId,
+                chatId,
+                fname,
+                lname
+            });
         }
 
     }, (errorObject) => {
@@ -332,7 +342,7 @@ Click /help to get help.\n\nClick here to select your department`, {
 
         ctx.telegram.sendMessage(chatId, `Hi ${fname?fname:""} ${lname?lname:""}
 I'm <a href="tg://user?id=1129048108">tkmce bot</a> developed to provide study materials.
-Click /help to get help.\n\nClick here to select your department`, {
+Click /help to get help.\n\nClick here to select your department 👇`, {
             reply_markup: {
                 inline_keyboard: [
                     [{ text: "CIVIL", callback_data: "ce" }, { text: "MECHANICAL", callback_data: "mech" }],
@@ -348,7 +358,7 @@ Click /help to get help.\n\nClick here to select your department`, {
 
 //Hi
 bot.hears(['Hi', 'hi', 'Hii', 'hii', 'hai', 'Hai'], (ctx) => {
-    ctx.telegram.sendMessage(ctx.chat.id, 'Click here to select your department', {
+    ctx.telegram.sendMessage(ctx.chat.id, 'Click here to select your department 👇', {
         reply_markup: {
             inline_keyboard: [
                 [{ text: "CIVIL", callback_data: "ce" }, { text: "MECHANICAL", callback_data: "mech" }],
@@ -362,7 +372,7 @@ bot.hears(['Hi', 'hi', 'Hii', 'hii', 'hai', 'Hai'], (ctx) => {
 
 //menu
 bot.action('menu', (ctx) => {
-    ctx.editMessageText('Click here to select you department', {
+    ctx.editMessageText('Click here to select you department 👇', {
         reply_markup: {
             inline_keyboard: [
                 [{ text: "CIVIL", callback_data: "ce" }, { text: "MECHANICAL", callback_data: "mech" }],
@@ -447,7 +457,6 @@ Please send 'Hi' or click /start to get options.
 For contributing study material, click /contribute
 `)
 })
-
 
 bot.on('callback_query', (ctx) => {
     let qData = ctx.callbackQuery.data
