@@ -14,6 +14,7 @@ var firebaseAdminSdk = require("firebase-admin")
 var { subjectsData, studyMaterials } = require('./data')
 var admins = [{ chatId: 625310795, userId: 'elab_innovations', name: 'e-lab innovations' }, { chatId: 591998055, userId: 'KarthikSunilK', name: 'Karthik Sunil K' }]
 var uploadMaterials = {}
+var uploadSubject = {}
 
 firebaseAdminSdk.initializeApp({
     credential: firebaseAdminSdk.credential.cert(
@@ -248,19 +249,35 @@ const sendMeterialDetails = (code, ctx) => {
 }
 
 const addMaterialToDB = (code, ctx) => {
-    ctx.telegram.sendChatAction(ctx.chat.id, 'upload_document')
+    ctx.telegram.sendChatAction(ctx.chat.id, 'typing')
     let message_id = code.split('_')[1]
     let uploadData = uploadMaterials[message_id]
     if (uploadData) {
         db.ref('studyMaterials').push(uploadData, error => {
             if (!error) {
                 ctx.reply(`New material added\n click /updateDB to update database`)
-            } else {
-                ctx.reply(`Failed from server\n ${JSON.stringify(error)}`)
                 delete uploadMaterials[message_id]
                 ctx.deleteMessage()
+            } else {
+                ctx.reply(`Failed from server\n ${JSON.stringify(error)}`)
             }
-            ctx.deleteMessage()
+        })
+    }
+}
+
+const addSubjectToDB = (code, ctx) => {
+    ctx.telegram.sendChatAction(ctx.chat.id, 'typing')
+    let message_id = code.split('_')[1]
+    let newSubject = uploadSubject[message_id]
+    if (newSubject) {
+        db.ref('subjects').push(newSubject, error => {
+            if (!error) {
+                ctx.reply(`New subject added\n click /updateDB to update database`)
+                delete uploadSubject[message_id]
+                ctx.deleteMessage()
+            } else {
+                ctx.reply(`Failed from server\n ${JSON.stringify(error)}`)
+            }
         })
     }
 }
@@ -466,6 +483,9 @@ bot.on('callback_query', (ctx) => {
     if (qData.startsWith('addMaterial_')) {
         addMaterialToDB(qData, ctx)
     }
+    if (qData.startsWith('addSubject_')) {
+        addSubjectToDB(qData, ctx)
+    }
 
     // Explicit usage
     ctx.telegram.answerCbQuery(ctx.callbackQuery.id)
@@ -503,14 +523,73 @@ bot.command('getid', ctx => {
     }
 })
 
+//Add New Subject
+bot.command('addSubject', ctx => {
+    let isAdmin = admins.find(admin => admin.chatId == ctx.chat.id)
+    if (isAdmin) {
+        let text = ctx.update.message.text
+        text = text.replace('/addSubject ', '')
+        let parameters = text.split('&')
+        let helpText = `Send like
+<code>/addSubject depertmentCode&semester&subjectCode&subjectName</code>
+
+<b>depertmentCode</b>: depertment code in small letters
+        ce - CIVIL ENGINEERING'
+        mech - MECHANICAL ENGINEERING'
+        eee - ELECTRICAL & ELECTRONICS ENGINEERING'
+        ece - ELECTRONICS & COMMUNICATION ENGINEERING'
+        cse - COMPUTER SCIENCE AND ENGINEERING'
+        ce - CHEMICAL ENGINEERING'
+        archi - ARCHITECTURE'
+<b>semester</b>: Semester (between 1 to 8)
+<b>subjectCode</b>: Subject in capital letters
+<b>subjectName</b>: Name of the subject
+
+eg: <code>/addSubject ece&2&EST102&Programming In C</code>`
+
+        if (!(parameters.length >= 4)) {
+            ctx.replyWithHTML('⚠️ ' + helpText)
+        } else {
+            let _department = parameters[0]
+            let _semester = parameters[1]
+            let _subjectCode = parameters[2]
+            parameters.shift() //remove subjectCode
+            parameters.shift() //remove modules
+            parameters.shift() //remove type
+            let _subjetcName = parameters.join('&amp;') // join full name
+
+            if (!['ce', 'mech', 'eee', 'ece', 'cse', 'ce', 'archi'].includes(_department)) {
+                ctx.replyWithHTML("⚠️ Department code not found\n\n" + helpText)
+            } else if (!(_semester > 0 && _semester < 9)) {
+                ctx.replyWithHTML("⚠️ Invalid semester\n\n" + helpText)
+            } else {
+                uploadSubject[ctx.update.message.message_id] = {department: _department, semester: _semester, subjectCode: _subjectCode, subjectName: _subjetcName}
+                ctx.replyWithHTML(`<b>New subject is ready add</b>\n
+<b>Department:</b> ${_department} - ${codeToName(_department)}
+<b>Semester:</b> ${_semester}
+<b>Subject Code:</b> ${_subjectCode}
+<b>Name:</b> ${_subjetcName}`, {
+                    reply_markup: {
+                        inline_keyboard: [
+                            [{ text: "❌ Cancel", callback_data: "deleteMsg" }, { text: "⬆️ Add", callback_data: "addSubject_" + ctx.update.message.message_id }]
+                        ]
+                    }
+                })
+            }
+        }
+    } else {
+        ctx.reply('⚠️ You don\'t have permission to perform this task. For assistance, contact your account admin')
+    }
+})
+
 //Add New Material
 bot.command('addMaterial', (ctx) => {
     let isAdmin = admins.find(admin => admin.chatId == ctx.chat.id)
     if (isAdmin) {
-    let text = ctx.update.message.text
-    text = text.replace('/addMaterial ', '')
-    let parameters = text.split('&')
-    let helpText = `Send like
+        let text = ctx.update.message.text
+        text = text.replace('/addMaterial ', '')
+        let parameters = text.split('&')
+        let helpText = `Send like
 <code>/addMaterial subjectCode&moduels&type&name</code>
 
 <b>subjectCode</b>: Subject in capital letters
@@ -590,9 +669,9 @@ eg: <code>/addMaterial HUT200&1,2&CN&Module 2 Class Note</code>`
         }
     }
     
-} else {
-    ctx.telegram.sendMessage(ctx.chat.id, '⚠️ You don\'t have permission to perform this task. For assistance, contact your account admin')
-}
+    } else {
+        ctx.telegram.sendMessage(ctx.chat.id, '⚠️ You don\'t have permission to perform this task. For assistance, contact your account admin')
+    }
 })
 
 /* ADMIN */
