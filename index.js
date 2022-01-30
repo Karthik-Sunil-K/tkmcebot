@@ -10,65 +10,69 @@ const bot = new Composer;
 /* PRODUCTION END */
 
 const axios = require('axios');
-// var firebaseAdminSdk = require("firebase-admin");
+var firebaseAdminSdk = require("firebase-admin")
 var { subjectsData, studyMaterials } = require('./data')
 var admins = [{ chatId: 625310795, userId: 'elab_innovations', name: 'e-lab innovations' }, { chatId: 591998055, userId: 'KarthikSunilK', name: 'Karthik Sunil K' }]
 var uploadMaterials = {}
 
-const api = "https://script.google.com/a/tkmce.ac.in/macros/s/AKfycbzKZvQrIDbNmbLuGV6BPDy-AJnBMeC-yMwm-ZjUW9Bdo4WI_w-r-ZelG0K0DZ7qudUx3Q/exec"
+firebaseAdminSdk.initializeApp({
+    credential: firebaseAdminSdk.credential.cert(
+        JSON.parse(Buffer.from(process.env.GOOGLE_CONFIG_BASE64, 'base64').toString('ascii'))),
+    databaseURL: "https://tkmcebot-default-rtdb.firebaseio.com/"
+});
+var db = firebaseAdminSdk.database()
 
-// firebaseAdminSdk.initializeApp({
-//     credential: firebaseAdminSdk.credential.cert(
-//         JSON.parse(Buffer.from(process.env.GOOGLE_CONFIG_BASE64, 'base64').toString('ascii')))
-// });
 
 
 const updateData = (ctx) => {
     if (ctx) {
         ctx.telegram.sendChatAction(ctx.chat.id, 'typing')
     }
-    axios.get(api + '?action=getSubjects')
-        .then(function(response) {
-            subjectsData = response.data ? response.data : subjectsData
 
-            if (ctx) {
-                ctx.telegram.sendMessage(ctx.chat.id, 'subjectsData updated, ' + subjectsData.length, +' items')
-            }
-        })
-        .catch(function(error) {
-            console.log(error);
-            if (ctx) {
-                ctx.telegram.sendMessage(ctx.chat.id, 'subjectsData updation failed, ' + subjectsData.length, +' items')
-            }
-        });
+    let _subjectsData = []
+    db.ref("subjects").once("value", snapshot => {
+        Object.keys(snapshot.val()).forEach(sub => _subjectsData.push(snapshot.val()[sub]))
+        subjectsData = _subjectsData
 
-    axios.get(api + '?action=getMaterials')
-        .then(function(response) {
-            studyMaterials = response.data ? response.data : studyMaterials
-            if (ctx) {
-                ctx.telegram.sendMessage(ctx.chat.id, 'studyMaterials updated, ' + studyMaterials.length, +' items')
-            }
-        })
-        .catch(function(error) {
-            console.log(error);
-            if (ctx) {
-                ctx.telegram.sendMessage(ctx.chat.id, 'studyMaterials updation failed, ' + studyMaterials.length, +' items')
-            }
-        });
+        if (ctx) {
+            ctx.telegram.sendMessage(ctx.chat.id, 'subjectsData updated, ' + subjectsData.length, +' items')
+        }
+    }, (errorObject) => {
+        console.log('subjectsData updation failed, ' + errorObject.name);
+        if (ctx) {
+            ctx.telegram.sendMessage(ctx.chat.id, 'subjectsData updation failed, ' + errorObject.name)
+        }
+    })
 
-    axios.get(api + '?action=getAdmins')
-        .then(function(response) {
-            admins = response.data ? response.data : admins
-            if (ctx) {
-                ctx.telegram.sendMessage(ctx.chat.id, 'admins updated, ' + admins.length, +' items')
-            }
-        })
-        .catch(function(error) {
-            console.log(error);
-            if (ctx) {
-                ctx.telegram.sendMessage(ctx.chat.id, 'admins updation failed, ' + admins.length, +' items')
-            }
-        });
+    let _studyMaterials = []
+    db.ref("studyMaterials").once("value", snapshot => {
+        Object.keys(snapshot.val()).forEach(material => _studyMaterials.push(snapshot.val()[material]))
+        studyMaterials = _studyMaterials
+
+        if (ctx) {
+            ctx.telegram.sendMessage(ctx.chat.id, 'studyMaterials updated, ' + studyMaterials.length, +' items')
+        }
+    }, (errorObject) => {
+        console.log('studyMaterials updation failed, ' + errorObject.name);
+        if (ctx) {
+            ctx.telegram.sendMessage(ctx.chat.id, 'studyMaterials updation failed, ' + errorObject.name)
+        }
+    })
+
+    let _admins = []
+    db.ref("admins").once("value", snapshot => {
+        Object.keys(snapshot.val()).forEach(admin => _admins.push(snapshot.val()[admin]))
+        admins = _admins
+
+        if (ctx) {
+            ctx.telegram.sendMessage(ctx.chat.id, 'admins updated, ' + admins.length, +' items')
+        }
+    }, (errorObject) => {
+        console.log('admins updation failed, ' + errorObject.name);
+        if (ctx) {
+            ctx.telegram.sendMessage(ctx.chat.id, 'admins updation failed, ' + errorObject.name)
+        }
+    })
 }
 
 const codeToName = code => {
@@ -248,52 +252,53 @@ const addMaterialToDB = (code, ctx) => {
     let message_id = code.split('_')[1]
     let uploadData = uploadMaterials[message_id]
     if (uploadData) {
-        let url = encodeURI(`https://script.google.com/a/tkmce.ac.in/macros/s/AKfycbzKZvQrIDbNmbLuGV6BPDy-AJnBMeC-yMwm-ZjUW9Bdo4WI_w-r-ZelG0K0DZ7qudUx3Q/exec?action=addMaterial&subjectCode=${uploadData.subjectCode}&module=${uploadData.modules}&type=${uploadData.type}&name=${uploadData.name}&content=${uploadData.content}`)
-        axios.get(url)
-            .then(function(response) {
-                if (response.data.success) {
-                    ctx.reply(`New material added\n click /updateDB to update database`)
-                } else {
-                    ctx.reply(`Failed from server\n ${response.data.error}`)
-                }
-            })
-            .catch(function(error) {
-                console.log(error);
-                ctx.reply(`Error\n\n${JSON.stringify(error)}`)
-            }).then(function() {
+        db.ref('studyMaterials').push(uploadData, error => {
+            if (!error) {
+                ctx.reply(`New material added\n click /updateDB to update database`)
+            } else {
+                ctx.reply(`Failed from server\n ${JSON.stringify(error)}`)
                 delete uploadMaterials[message_id]
                 ctx.deleteMessage()
-            })
+            }
+            ctx.deleteMessage()
+        })
     }
 }
 
 
 //Start
 bot.start((ctx) => {
-    let fname = ctx.message.chat.first_name
-    let lname = ctx.message.chat.last_name
+    let fname = ctx.message.chat.first_name ? ctx.message.chat.first_name : ''
+    let lname = ctx.message.chat.last_name ? ctx.message.chat.last_name : ''
+    let chatId = ctx.chat.id
+    let userId = ctx.chat.username ? ctx.chat.username : ''
     ctx.telegram.sendChatAction(ctx.chat.id, 'typing')
 
-    axios.get(`https://script.google.com/a/tkmce.ac.in/macros/s/AKfycbzKZvQrIDbNmbLuGV6BPDy-AJnBMeC-yMwm-ZjUW9Bdo4WI_w-r-ZelG0K0DZ7qudUx3Q/exec?action=newUser&userId=${ctx.chat.username?ctx.chat.username:''}&chatId=${ctx.chat.id}&name=${fname?fname:""} ${lname?lname:""}`)
-        .then(function(response) {
-            let isNew = response.data.success
-            if (isNew) {
-                ctx.replyWithHTML(`Hi ${fname?fname:""} ${lname?lname:""}
+    db.ref("users/" + chatId).once("value", snapshot => {
+        let isNew = !snapshot.val()
+        if (isNew) {
+            ctx.telegram.sendMessage(chatId, `Hi ${fname} ${lname}
 I'm <a href="tg://user?id=1129048108">tkmce bot</a> developed to provide study materials.
-Please send 'Hi' or click /start to get options.
-For contributing study material, click /contribute`)
-            } else {
-                ctx.reply(`Hi ${fname?fname:""} ${lname?lname:""}\nWelcome back 😍`)
-            }
-        })
-        .catch(function(error) {
-            console.log(error);
-            ctx.replyWithHTML(`Hi ${fname?fname:""} ${lname?lname:""}
-I'm <a href="tg://user?id=1129048108">tkmce bot</a> developed to provide study materials.
-Please send 'Hi' or click /start to get options.
-For contributing study material, click /contribute`)
-        }).then(function() {
-            ctx.telegram.sendMessage(ctx.chat.id, 'Click here to select your department', {
+Click /help to get help.\n\nClick here to select your department`, {
+                reply_markup: {
+                    inline_keyboard: [
+                        [{ text: "CIVIL", callback_data: "ce" }, { text: "MECHANICAL", callback_data: "mech" }],
+                        [{ text: "ELECTRICAL & ELECTRONICS", callback_data: "eee" }, { text: "ELECTRONICS & COMMUNICATION", callback_data: "ece" }],
+                        [{ text: "COMPUTER SCIENCE", callback_data: "cse" }, { text: "CHEMICAL", callback_data: "ce" }],
+                        [{ text: "ARCHITECTURE", callback_data: "archi" }, { text: "⚙️ More Options", callback_data: "more-options" }]
+                    ]
+                },
+                parse_mode: 'HTML'
+            })
+
+            db.ref('users').child(chatId).set({
+                userId,
+                chatId,
+                fname,
+                lname
+            });
+        } else {
+            ctx.telegram.sendMessage(chatId, `Hi ${fname} ${lname}\nWelcome back 😍\n\nClick here to select your department`, {
                 reply_markup: {
                     inline_keyboard: [
                         [{ text: "CIVIL", callback_data: "ce" }, { text: "MECHANICAL", callback_data: "mech" }],
@@ -303,7 +308,25 @@ For contributing study material, click /contribute`)
                     ]
                 }
             })
+        }
+
+    }, (errorObject) => {
+        console.log('User read failed, ' + errorObject.name);
+
+        ctx.telegram.sendMessage(chatId, `Hi ${fname?fname:""} ${lname?lname:""}
+I'm <a href="tg://user?id=1129048108">tkmce bot</a> developed to provide study materials.
+Click /help to get help.\n\nClick here to select your department`, {
+            reply_markup: {
+                inline_keyboard: [
+                    [{ text: "CIVIL", callback_data: "ce" }, { text: "MECHANICAL", callback_data: "mech" }],
+                    [{ text: "ELECTRICAL & ELECTRONICS", callback_data: "eee" }, { text: "ELECTRONICS & COMMUNICATION", callback_data: "ece" }],
+                    [{ text: "COMPUTER SCIENCE", callback_data: "cse" }, { text: "CHEMICAL", callback_data: "ce" }],
+                    [{ text: "ARCHITECTURE", callback_data: "archi" }, { text: "⚙️ More Options", callback_data: "more-options" }]
+                ]
+            },
+            parse_mode: 'HTML'
         })
+    })
 })
 
 //Hi
@@ -332,6 +355,7 @@ bot.action('menu', (ctx) => {
             ]
         }
     })
+    ctx.answerCbQuery()
 })
 
 //More options
@@ -345,6 +369,7 @@ bot.action('more-options', ctx => {
             ]
         }
     })
+    ctx.answerCbQuery()
 })
 
 //Conact admin option
@@ -358,6 +383,7 @@ bot.action('contactDevs', ctx => {
             ]
         }
     })
+    ctx.answerCbQuery()
 })
 
 //Delete Message
@@ -377,6 +403,7 @@ ${admins.map(admin => `🧑‍💻 <a href="tg://user?id=${admin.chatId}">${admi
     ctx.telegram.sendMessage(ctx.chat.id, msg, {
         parse_mode: 'HTML'
     })
+    ctx.answerCbQuery()
 })
 
 //contribute
@@ -502,17 +529,28 @@ eg: <code>/addMaterial HUT200&1,2&CN&Module 2 Class Note</code>`
     } else {
         if (ctx.update.message.reply_to_message) {
             let subjectCode = parameters[0]
-            let modules = parameters[1]
+            let modules = parameters[1].split(',')
             let type = parameters[2]
             parameters.shift() //remove subjectCode
             parameters.shift() //remove modules
             parameters.shift() //remove type
             let name = parameters.join('&amp;') // join full name
 
+            let validModules = () => {
+                let _err = false
+                modules.forEach(module => {
+                    _err = _err | module < 0
+                    _err = _err | module > 5
+                })
+                return !_err
+            }
+
             if (!(subjectsData.find(m => m.code == subjectCode))) {
                 ctx.replyWithHTML("⚠️ Subject code not found\nCheck subject code or update DB\n\n" + helpText)
             } else if(!(type == 'CN' || type == 'PN' || type == 'TB' || type == 'QP' || type == 'V')) {
                 ctx.replyWithHTML("⚠️ Wrong type\n\n" + helpText)
+            }  else if(!(validModules())) {
+                ctx.replyWithHTML("⚠️ Wrong modules\n\n" + helpText)
             } else if (ctx.update.message.reply_to_message.document) {
                 let content = ctx.update.message.reply_to_message.document.file_id;
                 uploadMaterials[ctx.update.message.message_id] = {subjectCode, modules, type, name, content}
