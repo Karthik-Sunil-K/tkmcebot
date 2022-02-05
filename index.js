@@ -1,6 +1,6 @@
 require('dotenv').config();
 /* TESTING START */
-const { Telegraf, Markup } = require('telegraf');
+// const { Telegraf, Markup } = require('telegraf');
 // const bot = new Telegraf(process.env.BOT_TOKEN);
 /* TESTING END */
 
@@ -291,7 +291,7 @@ bot.start((ctx) => {
     let chatId = ctx.chat.id
     let userId = ctx.chat.username ? ctx.chat.username : ''
     ctx.telegram.sendChatAction(ctx.chat.id, 'typing')
-    console.log(ctx.chat);
+        // console.log(ctx.chat);
 
     db.ref("users/" + chatId).once("value", snapshot => {
         let isNew = !snapshot.val()
